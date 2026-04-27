@@ -15,3 +15,8 @@
  *.mobi
  *.pdf
  .ipynb_checkpoints/
+
+# Polish tool
+tools/polish/.env
+tools/polish/.backups/
+tools/polish/__pycache__/

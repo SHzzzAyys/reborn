@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Reborn 润色助手</title>
+  <script src="https://cdn.jsdelivr.net/npm/diff-match-patch@1.0.5/index.min.js"></script>
+  <style>
+    :root {
+      --bg: #fafaf7;
+      --fg: #1f1f1f;
+      --muted: #6b6b6b;
+      --border: #e2e2dc;
+      --accept: #2a8a3e;
+      --reject: #b04444;
+      --skip: #888;
+      --ins-bg: #d8f0d8;
+      --del-bg: #f6d6d6;
+      --del-fg: #8a2a2a;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, "PingFang SC", "Helvetica Neue", Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--fg);
+      line-height: 1.7;
+    }
+    header {
+      position: sticky; top: 0; z-index: 5;
+      background: #fff;
+      border-bottom: 1px solid var(--border);
+      padding: 10px 16px;
+      display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    }
+    header h1 { font-size: 16px; margin: 0 8px 0 0; font-weight: 600; }
+    select, button { font: inherit; }
+    select {
+      padding: 6px 10px; border: 1px solid var(--border); border-radius: 6px;
+      background: #fff;
+    }
+    button {
+      padding: 6px 12px; border: 1px solid var(--border); border-radius: 6px;
+      background: #fff; cursor: pointer;
+    }
+    button:hover { background: #f0f0ec; }
+    button.primary { background: #1f1f1f; color: #fff; border-color: #1f1f1f; }
+    button.primary:hover { background: #333; }
+    button:disabled { opacity: .5; cursor: not-allowed; }
+    .stats { color: var(--muted); font-size: 13px; margin-left: auto; }
+    main { max-width: 880px; margin: 0 auto; padding: 16px; }
+    .card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin: 10px 0;
+      position: relative;
+    }
+    .card.skip { background: #f4f4ef; color: var(--muted); font-family: ui-monospace, Menlo, Consolas, monospace; white-space: pre-wrap; font-size: 13px; padding: 6px 10px; }
+    .card.skip pre { margin: 0; white-space: pre-wrap; }
+    .card .raw { white-space: pre-wrap; }
+    .card .actions { margin-top: 10px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .card .actions .spacer { flex: 1; }
+    .card .status { font-size: 12px; color: var(--muted); }
+    .card.accepted { border-color: var(--accept); }
+    .card.rejected { border-color: var(--reject); }
+    .card.skipped { opacity: .5; }
+    .diff { background: #fbfbf6; border: 1px dashed var(--border); border-radius: 6px; padding: 10px 12px; margin-top: 8px; white-space: pre-wrap; }
+    .diff ins { background: var(--ins-bg); text-decoration: none; }
+    .diff del { background: var(--del-bg); color: var(--del-fg); text-decoration: line-through; }
+    .issues { font-size: 13px; color: var(--muted); margin-top: 8px; }
+    .issues ul { margin: 4px 0 0 18px; padding: 0; }
+    .toast {
+      position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+      background: #1f1f1f; color: #fff; padding: 10px 16px; border-radius: 6px;
+      box-shadow: 0 4px 14px rgba(0,0,0,.18); font-size: 14px;
+      opacity: 0; pointer-events: none; transition: opacity .2s;
+    }
+    .toast.show { opacity: 1; }
+    .toast.error { background: #b04444; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Reborn 润色</h1>
+    <select id="file-select"><option value="">— 选择文件 —</option></select>
+    <button id="polish-all">润色全部段落</button>
+    <button id="save" class="primary" disabled>保存到文件</button>
+    <span class="stats" id="stats"></span>
+  </header>
+  <main id="main"></main>
+  <div class="toast" id="toast"></div>
+  <script src="app.js"></script>
+</body>
+</html>
