@@ -20,3 +20,7 @@
 tools/polish/.env
 tools/polish/.backups/
 tools/polish/__pycache__/
+
+# Lint tool
+tools/lint/report.html
+tools/lint/__pycache__/
