@@ -42,6 +42,36 @@ h1 {
 
 .icon-btn:hover { background: #ede5d0; }
 
+.meal-selector {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 20px;
+  background: #ede5d0;
+  padding: 4px;
+  border-radius: 8px;
+}
+
+.meal-tab {
+  flex: 1;
+  padding: 10px 8px;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 14px;
+  color: #6b6357;
+  transition: background 0.15s;
+}
+
+.meal-tab:hover { color: #2c2a26; }
+
+.meal-tab.active {
+  background: #fffcf3;
+  color: #2c2a26;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
 .mood-block { margin-bottom: 20px; }
 
 label {
@@ -200,6 +230,37 @@ h3 {
   padding: 8px 12px;
   border-bottom: 1px solid #ede5d0;
   font-size: 14px;
+}
+
+.candidate-item .candidate-name {
+  flex: 1;
+  margin: 0 12px;
+}
+
+.meal-toggles {
+  display: flex;
+  gap: 3px;
+}
+
+.meal-pill {
+  width: 26px;
+  padding: 3px 0;
+  font-size: 11px;
+  border: 1px solid #d4c9ac;
+  border-radius: 3px;
+  background: transparent;
+  color: #a89e8a;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: center;
+}
+
+.meal-pill:hover { border-color: #c4b89a; }
+
+.meal-pill.active {
+  background: #c75d3a;
+  color: #fffcf3;
+  border-color: #c75d3a;
 }
 
 #candidates-list li:last-child, #history-list li:last-child {

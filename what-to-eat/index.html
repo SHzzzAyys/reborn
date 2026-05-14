@@ -14,6 +14,12 @@
     </header>
 
     <section id="main-view" class="view">
+      <div class="meal-selector" role="tablist" aria-label="餐别">
+        <button class="meal-tab" data-meal="breakfast" role="tab">早餐</button>
+        <button class="meal-tab" data-meal="lunch" role="tab">午餐</button>
+        <button class="meal-tab" data-meal="dinner" role="tab">晚餐</button>
+      </div>
+
       <div class="mood-block">
         <label for="mood-input">心情 / 想法（可选）</label>
         <textarea id="mood-input" rows="2" placeholder="例：累了想清淡的、有点饿、约会、刚跑完步想吃肉..."></textarea>
