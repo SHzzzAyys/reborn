@@ -1,0 +1,2578 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chronos · Engineering Plan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,300&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&family=Noto+Serif+SC:wght@300;400;500;600&family=Noto+Sans+SC:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #F1EFE8;
+  --bg-deep: #EAE7DC;
+  --paper: #FAF8F1;
+  --ink: #2C2C2A;
+  --ink-soft: #5F5E5A;
+  --ink-mute: #888780;
+  --ink-faint: #B4B2A9;
+  --rule: #D3D1C7;
+  --accent-blue: #185FA5;
+  --accent-blue-soft: #DCE7F4;
+  --accent-blue-mid: #5F94D1;
+  --accent-blue-deep: #0C447C;
+
+  --serif: 'Fraunces', 'Noto Serif SC', Georgia, serif;
+  --sans: 'Inter', 'Noto Sans SC', system-ui, sans-serif;
+  --mono: 'JetBrains Mono', 'SF Mono', Menlo, monospace;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-weight: 400;
+  line-height: 1.65;
+  font-size: 15px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection { background: var(--ink); color: var(--bg); }
+
+/* ============================================================ */
+/* SCROLL PROGRESS */
+/* ============================================================ */
+
+#scroll-progress {
+  position: fixed;
+  top: 0; left: 0;
+  height: 2px;
+  width: 0%;
+  background: var(--ink);
+  z-index: 1000;
+  transition: width 0.1s linear;
+}
+
+/* ============================================================ */
+/* SCROLL REVEAL */
+/* ============================================================ */
+
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+              transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ============================================================ */
+/* COVER */
+/* ============================================================ */
+
+.cover {
+  min-height: 100vh;
+  padding: 64px 72px 80px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  background: linear-gradient(180deg, var(--bg) 0%, var(--bg-deep) 100%);
+  overflow: hidden;
+}
+
+.cover-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: var(--ink-mute);
+  text-transform: uppercase;
+}
+
+.cover-header .left { display: flex; gap: 24px; }
+.cover-header .right { text-align: right; }
+
+/* Live clock */
+#live-clock {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: var(--ink-mute);
+  text-transform: uppercase;
+}
+
+.cover-mark {
+  display: flex;
+  gap: 6px;
+  margin-top: 80px;
+  align-items: center;
+}
+
+.cover-mark .dot {
+  width: 14px; height: 14px; border-radius: 50%;
+  animation: pulse-dot 3s ease-in-out infinite;
+}
+.cover-mark .dot:nth-child(1) { background: #2C2C2A; animation-delay: 0s; }
+.cover-mark .dot:nth-child(2) { background: #5F5E5A; animation-delay: 0.15s; }
+.cover-mark .dot:nth-child(3) { background: #888780; animation-delay: 0.30s; }
+.cover-mark .dot:nth-child(4) { background: #B4B2A9; animation-delay: 0.45s; }
+.cover-mark .dot:nth-child(5) { background: #D3D1C7; animation-delay: 0.60s; }
+
+@keyframes pulse-dot {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.35); opacity: 0.7; }
+}
+
+.cover-title {
+  font-family: var(--serif);
+  font-size: clamp(72px, 14vw, 180px);
+  font-weight: 300;
+  line-height: 0.9;
+  letter-spacing: -0.04em;
+  margin-top: 40px;
+  font-variation-settings: "opsz" 144;
+}
+
+.cover-title em {
+  font-style: italic;
+  font-weight: 300;
+  color: var(--ink-soft);
+}
+
+.cover-subtitle {
+  font-family: var(--serif);
+  font-size: 22px;
+  font-weight: 300;
+  font-style: italic;
+  color: var(--ink-soft);
+  margin-top: 32px;
+  max-width: 540px;
+  line-height: 1.45;
+}
+
+.cover-meta {
+  margin-top: auto;
+  padding-top: 80px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 32px;
+  border-top: 0.5px solid var(--rule);
+}
+
+.cover-meta-item .label {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  color: var(--ink-mute);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.cover-meta-item .value {
+  font-family: var(--serif);
+  font-size: 16px;
+  font-weight: 400;
+  color: var(--ink);
+}
+
+/* ============================================================ */
+/* GLOBAL */
+/* ============================================================ */
+
+.page {
+  padding: 96px 72px;
+  max-width: 1100px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.section-number {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  color: var(--ink-mute);
+  text-transform: uppercase;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.section-number::after {
+  content: "";
+  flex: 1;
+  height: 0.5px;
+  background: var(--rule);
+}
+
+h1.section-title {
+  font-family: var(--serif);
+  font-size: 56px;
+  font-weight: 400;
+  line-height: 1.05;
+  letter-spacing: -0.025em;
+  margin-bottom: 24px;
+  font-variation-settings: "opsz" 96;
+}
+
+h1.section-title em {
+  font-style: italic;
+  font-weight: 300;
+  color: var(--ink-soft);
+}
+
+.section-lede {
+  font-family: var(--serif);
+  font-size: 22px;
+  font-weight: 300;
+  line-height: 1.5;
+  color: var(--ink-soft);
+  margin-bottom: 64px;
+  max-width: 720px;
+  font-style: italic;
+}
+
+h2 {
+  font-family: var(--serif);
+  font-size: 32px;
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  margin: 80px 0 24px;
+  font-variation-settings: "opsz" 72;
+}
+
+h3 {
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink);
+  margin: 40px 0 16px;
+}
+
+h4 {
+  font-family: var(--sans);
+  font-size: 15px;
+  font-weight: 500;
+  margin: 24px 0 12px;
+}
+
+p {
+  margin-bottom: 16px;
+  max-width: 720px;
+}
+
+p.lede {
+  font-family: var(--serif);
+  font-size: 19px;
+  font-weight: 300;
+  line-height: 1.55;
+  color: var(--ink-soft);
+  margin-bottom: 32px;
+  max-width: 720px;
+}
+
+strong { font-weight: 500; color: var(--ink); }
+em { font-style: italic; }
+
+a { color: var(--accent-blue); text-decoration: none; border-bottom: 0.5px solid currentColor; }
+a:hover { color: var(--accent-blue-deep); }
+
+code {
+  font-family: var(--mono);
+  font-size: 13px;
+  background: var(--bg-deep);
+  padding: 2px 6px;
+  border-radius: 3px;
+  color: var(--ink);
+}
+
+/* ============================================================ */
+/* TOC */
+/* ============================================================ */
+
+.toc {
+  background: var(--paper);
+  border: 0.5px solid var(--rule);
+  border-radius: 2px;
+  padding: 56px 56px;
+  margin: 96px 0;
+}
+
+.toc-list {
+  list-style: none;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px 80px;
+}
+
+.toc-list li {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  border-bottom: 0.5px dotted var(--rule);
+  padding-bottom: 10px;
+}
+
+.toc-list .num {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink-mute);
+  letter-spacing: 0.1em;
+  min-width: 32px;
+}
+
+.toc-list .title {
+  font-family: var(--serif);
+  font-size: 17px;
+  font-weight: 400;
+  flex: 1;
+}
+
+.toc-list .page {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink-mute);
+  padding: 0;
+  max-width: none;
+  margin: 0;
+}
+
+/* ============================================================ */
+/* PULL QUOTE */
+/* ============================================================ */
+
+.pull-quote {
+  margin: 64px 0;
+  padding: 48px 0;
+  border-top: 0.5px solid var(--ink);
+  border-bottom: 0.5px solid var(--ink);
+}
+
+.pull-quote blockquote {
+  font-family: var(--serif);
+  font-size: 32px;
+  font-weight: 300;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  font-style: italic;
+  color: var(--ink);
+  font-variation-settings: "opsz" 72;
+}
+
+.pull-quote cite {
+  display: block;
+  margin-top: 20px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  color: var(--ink-mute);
+  text-transform: uppercase;
+  font-style: normal;
+}
+
+/* ============================================================ */
+/* DATA TABLE */
+/* ============================================================ */
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 24px 0 40px;
+  font-size: 14px;
+}
+
+.data-table th {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  text-align: left;
+  padding: 12px 16px 12px 0;
+  border-bottom: 0.5px solid var(--ink);
+}
+
+.data-table td {
+  padding: 14px 16px 14px 0;
+  border-bottom: 0.5px solid var(--rule);
+  vertical-align: top;
+  line-height: 1.5;
+}
+
+.data-table tr:last-child td {
+  border-bottom: 0.5px solid var(--ink);
+}
+
+.data-table td:first-child {
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.data-table .accent { color: var(--accent-blue); font-family: var(--mono); font-size: 12px; }
+
+/* ============================================================ */
+/* CALLOUT */
+/* ============================================================ */
+
+.callout {
+  background: var(--paper);
+  border-left: 2px solid var(--ink);
+  padding: 24px 32px;
+  margin: 32px 0;
+  font-family: var(--serif);
+  font-size: 17px;
+  font-style: italic;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+.callout .label {
+  display: block;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  font-style: normal;
+  color: var(--ink-mute);
+  margin-bottom: 10px;
+}
+
+/* ============================================================ */
+/* PRINCIPLE CARDS */
+/* ============================================================ */
+
+.principles {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+  margin: 32px 0 48px;
+}
+
+.principle {
+  background: var(--paper);
+  border: 0.5px solid var(--rule);
+  padding: 32px;
+  position: relative;
+  transition: border-color 0.25s, box-shadow 0.25s;
+}
+
+.principle:hover {
+  border-color: var(--ink-mute);
+  box-shadow: 0 4px 24px rgba(44,44,42,0.07);
+}
+
+.principle .num {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink-mute);
+  letter-spacing: 0.15em;
+  margin-bottom: 16px;
+}
+
+.principle h4 {
+  font-family: var(--serif);
+  font-size: 22px;
+  font-weight: 400;
+  margin: 0 0 12px;
+  letter-spacing: -0.01em;
+}
+
+.principle p {
+  font-size: 13.5px;
+  color: var(--ink-soft);
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* ============================================================ */
+/* TWO-COLUMN */
+/* ============================================================ */
+
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1.4fr;
+  gap: 64px;
+  margin: 48px 0;
+  align-items: start;
+}
+
+.two-col .label-col {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  padding-top: 4px;
+}
+
+/* ============================================================ */
+/* COLOR PALETTE */
+/* ============================================================ */
+
+.palette {
+  margin: 32px 0 48px;
+}
+
+.palette-row {
+  display: grid;
+  grid-template-columns: 100px 1fr;
+  gap: 32px;
+  padding: 20px 0;
+  border-bottom: 0.5px solid var(--rule);
+  align-items: center;
+}
+
+.palette-row:first-child { border-top: 0.5px solid var(--rule); }
+
+.palette-row .name {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink-mute);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.palette-swatches {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 12px;
+}
+
+.swatch {
+  aspect-ratio: 2.5 / 1;
+  display: flex;
+  align-items: flex-end;
+  padding: 8px 10px;
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+.swatch:hover { transform: scale(1.04); }
+.swatch.dark { color: var(--bg); }
+.swatch.light { color: var(--ink); }
+
+/* ============================================================ */
+/* TIMELINE */
+/* ============================================================ */
+
+.timeline {
+  margin: 48px 0;
+  border-top: 0.5px solid var(--ink);
+}
+
+.timeline-row {
+  display: grid;
+  grid-template-columns: 100px 80px 1fr;
+  gap: 32px;
+  padding: 28px 0;
+  border-bottom: 0.5px solid var(--rule);
+}
+
+.timeline-row .phase {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+}
+
+.timeline-row .duration {
+  font-family: var(--serif);
+  font-size: 18px;
+  font-style: italic;
+  color: var(--ink-soft);
+}
+
+.timeline-row .content h4 {
+  font-family: var(--serif);
+  font-size: 22px;
+  font-weight: 400;
+  margin: 0 0 8px;
+  letter-spacing: -0.01em;
+}
+
+.timeline-row .content .summary {
+  font-size: 14px;
+  color: var(--ink-soft);
+  margin: 0 0 16px;
+}
+
+.timeline-row .deliverables {
+  list-style: none;
+  font-size: 13px;
+  color: var(--ink-soft);
+  margin: 0;
+}
+
+.timeline-row .deliverables li {
+  padding: 4px 0 4px 16px;
+  position: relative;
+  line-height: 1.6;
+}
+
+.timeline-row .deliverables li::before {
+  content: "—";
+  position: absolute;
+  left: 0;
+  color: var(--ink-faint);
+}
+
+/* ============================================================ */
+/* METRICS */
+/* ============================================================ */
+
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: var(--rule);
+  border: 0.5px solid var(--rule);
+  margin: 48px 0;
+}
+
+.metric {
+  background: var(--paper);
+  padding: 32px 24px;
+}
+
+.metric .label {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  margin-bottom: 12px;
+}
+
+.metric .value {
+  font-family: var(--serif);
+  font-size: 36px;
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  margin-bottom: 8px;
+  font-variation-settings: "opsz" 96;
+}
+
+.metric .desc {
+  font-size: 12px;
+  color: var(--ink-soft);
+  line-height: 1.5;
+}
+
+/* ============================================================ */
+/* FOOTNOTES & DECORATION */
+/* ============================================================ */
+
+.divider-ornament {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 80px 0;
+  gap: 24px;
+}
+
+.divider-ornament::before,
+.divider-ornament::after {
+  content: "";
+  flex: 1;
+  max-width: 200px;
+  height: 0.5px;
+  background: var(--rule);
+}
+
+.divider-ornament .ornament {
+  font-family: var(--serif);
+  font-size: 24px;
+  color: var(--ink-mute);
+  font-style: italic;
+  font-weight: 300;
+}
+
+.colophon {
+  background: var(--ink);
+  color: var(--bg);
+  padding: 96px 72px;
+  margin-top: 96px;
+}
+
+.colophon .inner {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.colophon h2 {
+  color: var(--bg);
+  font-style: italic;
+  font-weight: 300;
+  margin-bottom: 32px;
+}
+
+.colophon p {
+  color: var(--bg-deep);
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.colophon .signature {
+  margin-top: 64px;
+  padding-top: 32px;
+  border-top: 0.5px solid var(--ink-mute);
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  display: flex;
+  justify-content: space-between;
+}
+
+/* ============================================================ */
+/* TASK LIST  */
+/* ============================================================ */
+
+.task-list {
+  list-style: none;
+  margin: 24px 0 40px;
+}
+
+.task-list li {
+  display: grid;
+  grid-template-columns: 48px 1fr 80px;
+  gap: 16px;
+  padding: 14px 0;
+  border-bottom: 0.5px solid var(--rule);
+  font-size: 14px;
+  align-items: baseline;
+}
+
+.task-list li:first-child { border-top: 0.5px solid var(--rule); }
+
+.task-list .id {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink-mute);
+}
+
+.task-list .name strong { color: var(--ink); }
+.task-list .name small {
+  display: block;
+  font-size: 12px;
+  color: var(--ink-mute);
+  margin-top: 2px;
+  font-weight: 400;
+}
+
+.task-list .effort {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink-soft);
+  text-align: right;
+}
+
+/* ============================================================ */
+/* RIVER OF DAYS — LIVE VISUALIZATION */
+/* ============================================================ */
+
+.river-section {
+  background: var(--paper);
+  border: 0.5px solid var(--rule);
+  padding: 56px;
+  margin: 56px 0;
+}
+
+.river-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 40px;
+}
+
+.river-header h3 {
+  font-family: var(--serif);
+  font-size: 28px;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  margin: 0;
+  text-transform: none;
+}
+
+.river-header .river-sub {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  color: var(--ink-mute);
+  text-transform: uppercase;
+}
+
+.river-legend {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+
+.river-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: var(--ink-mute);
+  text-transform: uppercase;
+}
+
+.river-legend-swatch {
+  width: 24px;
+  height: 8px;
+  border-radius: 2px;
+}
+
+#river-canvas-wrap {
+  position: relative;
+  overflow: hidden;
+}
+
+#river-svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* tooltip */
+#river-tooltip {
+  position: fixed;
+  background: var(--ink);
+  color: var(--bg);
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  padding: 8px 14px;
+  border-radius: 2px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s;
+  z-index: 999;
+  white-space: nowrap;
+}
+
+/* ============================================================ */
+/* PIXEL YEAR — LIVE VISUALIZATION */
+/* ============================================================ */
+
+.pixel-year-section {
+  background: var(--paper);
+  border: 0.5px solid var(--rule);
+  padding: 56px;
+  margin: 56px 0;
+}
+
+.pixel-year-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 32px;
+}
+
+.pixel-year-header h3 {
+  font-family: var(--serif);
+  font-size: 28px;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  margin: 0;
+  text-transform: none;
+}
+
+#pixel-year-svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  margin-bottom: 32px;
+}
+
+.pixel-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: var(--rule);
+  border: 0.5px solid var(--rule);
+}
+
+.pixel-stat {
+  background: var(--paper);
+  padding: 24px 20px;
+}
+
+.pixel-stat .label {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  margin-bottom: 8px;
+}
+
+.pixel-stat .value {
+  font-family: var(--serif);
+  font-size: 28px;
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  font-variation-settings: "opsz" 72;
+}
+
+/* ============================================================ */
+/* RESPONSIVE */
+/* ============================================================ */
+
+@media print {
+  body { background: var(--bg); }
+  .page, .cover { padding: 48px 56px; }
+  h1.section-title { font-size: 42px; }
+  .cover-title { font-size: 110px; }
+  #scroll-progress { display: none; }
+}
+
+@media (max-width: 768px) {
+  .page, .cover { padding: 48px 32px; }
+  .cover-title { font-size: 80px; }
+  .cover-meta, .toc-list { grid-template-columns: 1fr; }
+  .principles, .two-col { grid-template-columns: 1fr; gap: 24px; }
+  .metrics { grid-template-columns: repeat(2, 1fr); }
+  .timeline-row { grid-template-columns: 1fr; gap: 12px; }
+  h1.section-title { font-size: 36px; }
+  .river-section, .pixel-year-section { padding: 32px 24px; }
+  .pixel-stats { grid-template-columns: repeat(2, 1fr); }
+}
+</style>
+</head>
+<body>
+
+<div id="scroll-progress"></div>
+<div id="river-tooltip"></div>
+
+<!-- ============================================================ -->
+<!-- COVER -->
+<!-- ============================================================ -->
+<section class="cover">
+  <div class="cover-header">
+    <div class="left">
+      <span>Document № 001</span>
+      <span>Confidential</span>
+    </div>
+    <div class="right">
+      Engineering Plan<br>
+      <span id="live-clock"></span>
+    </div>
+  </div>
+
+  <div class="cover-mark">
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+  </div>
+
+  <h1 class="cover-title">Chronos<em>.</em></h1>
+  <p class="cover-subtitle">
+    A minimal, bilingual companion for noticing your days—and discovering<br>
+    how your time actually moves.
+  </p>
+
+  <div class="cover-meta">
+    <div class="cover-meta-item">
+      <div class="label">Discipline</div>
+      <div class="value">Product · Design · Engineering</div>
+    </div>
+    <div class="cover-meta-item">
+      <div class="label">Platform</div>
+      <div class="value">iOS · Android · Web</div>
+    </div>
+    <div class="cover-meta-item">
+      <div class="label">Timeline</div>
+      <div class="value">8 months to v1.0</div>
+    </div>
+    <div class="cover-meta-item">
+      <div class="label">Author</div>
+      <div class="value">Solo founder / part-time</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- TOC -->
+<!-- ============================================================ -->
+<section class="page">
+  <div class="section-number">Table of Contents · 目录</div>
+
+  <div class="toc reveal">
+    <ol class="toc-list">
+      <li><span class="num">01</span><span class="title">Executive Summary 概要</span><span class="page">04</span></li>
+      <li><span class="num">02</span><span class="title">Product Vision 产品愿景</span><span class="page">06</span></li>
+      <li><span class="num">03</span><span class="title">Market Position 市场定位</span><span class="page">10</span></li>
+      <li><span class="num">04</span><span class="title">Design Philosophy 设计哲学</span><span class="page">14</span></li>
+      <li><span class="num">05</span><span class="title">Visual Identity 视觉系统</span><span class="page">18</span></li>
+      <li><span class="num">06</span><span class="title">Feature Architecture 功能架构</span><span class="page">24</span></li>
+      <li><span class="num">07</span><span class="title">Information Design 信息设计</span><span class="page">30</span></li>
+      <li><span class="num">08</span><span class="title">Signature Visualizations 招牌可视化</span><span class="page">36</span></li>
+      <li><span class="num">09</span><span class="title">Onboarding Experience 初次体验</span><span class="page">42</span></li>
+      <li><span class="num">10</span><span class="title">Automation Strategy 自动化策略</span><span class="page">46</span></li>
+      <li><span class="num">11</span><span class="title">Technical Architecture 技术架构</span><span class="page">52</span></li>
+      <li><span class="num">12</span><span class="title">Privacy Framework 隐私框架</span><span class="page">58</span></li>
+      <li><span class="num">13</span><span class="title">Development Roadmap 开发路线</span><span class="page">62</span></li>
+      <li><span class="num">14</span><span class="title">Go-to-Market 上线策略</span><span class="page">68</span></li>
+      <li><span class="num">15</span><span class="title">Business Model 商业模式</span><span class="page">72</span></li>
+      <li><span class="num">16</span><span class="title">Operating Cadence 工作节奏</span><span class="page">76</span></li>
+    </ol>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 01 - EXECUTIVE SUMMARY -->
+<!-- ============================================================ -->
+<section class="page">
+  <div class="section-number">01 · Executive Summary</div>
+  <h1 class="section-title reveal">A document<br>about <em>noticing.</em></h1>
+  <p class="section-lede reveal">
+    Chronos is a time-tracking application that treats the act of recording as an act of reflection,
+    not bookkeeping. This document defines the product in full.
+  </p>
+
+  <h3>The Thesis</h3>
+  <p>
+    The time-tracking category is mature but unloved. <strong>Toggl</strong> is built for billing.
+    <strong>RescueTime</strong> is built for surveillance. <strong>Daylio</strong> is built for emotions
+    but not for time. <strong>Day One</strong> is built for words but not for data. None of them are built
+    for a person who simply wants to <em>see how their days move.</em>
+  </p>
+  <p>
+    Chronos sits in this gap. It is small, intentional, and refuses to optimize for engagement.
+    It records time and mood with equal weight. It visualizes a year in a way that fits on one screen.
+    And it ships with privacy as the default, not the upgrade.
+  </p>
+
+  <div class="metrics reveal">
+    <div class="metric">
+      <div class="label">Target</div>
+      <div class="value">5–10%</div>
+      <div class="desc">of smartphone users who track anything about themselves</div>
+    </div>
+    <div class="metric">
+      <div class="label">North Star</div>
+      <div class="value">D7 ≥ 40%</div>
+      <div class="desc">seven-day retention among first 100 users</div>
+    </div>
+    <div class="metric">
+      <div class="label">Build</div>
+      <div class="value">~32w</div>
+      <div class="desc">part-time, 10–12 hours per week, single founder</div>
+    </div>
+    <div class="metric">
+      <div class="label">Cost</div>
+      <div class="value">&lt; $300</div>
+      <div class="desc">all-in, year one (Apple dev account + minimal cloud)</div>
+    </div>
+  </div>
+
+  <h3>The Operating Principles</h3>
+
+  <div class="principles">
+    <div class="principle reveal">
+      <div class="num">№ 01</div>
+      <h4>Less is the feature</h4>
+      <p>Every removed surface is a deliberate design choice. Restraint is a competitive advantage in a category drowning in features.</p>
+    </div>
+    <div class="principle reveal">
+      <div class="num">№ 02</div>
+      <h4>The record is the reward</h4>
+      <p>Users will not be reminded, gamified, or guilt-tripped. The visualization itself must be beautiful enough to pull people back.</p>
+    </div>
+    <div class="principle reveal">
+      <div class="num">№ 03</div>
+      <h4>Privacy as architecture</h4>
+      <p>Local-first storage. Encrypted sync only when requested. The server, when it exists, sees ciphertext only.</p>
+    </div>
+    <div class="principle reveal">
+      <div class="num">№ 04</div>
+      <h4>Native to two tongues</h4>
+      <p>Chinese and English are first-class citizens from day one. Not translation—co-design. Content language is independent of UI language.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 02 - PRODUCT VISION -->
+<!-- ============================================================ -->
+<section class="page">
+  <div class="section-number">02 · Product Vision</div>
+  <h1 class="section-title reveal">Time is the only material<br><em>we are made of.</em></h1>
+  <p class="section-lede reveal">
+    Most time-tracking products promise productivity. Chronos promises something stranger and more useful: awareness.
+  </p>
+
+  <h2>What it does</h2>
+  <p>
+    A user opens Chronos and writes one line: <em>"morning walk."</em> They tap one category—movement.
+    They drag a slider to thirty minutes. They tap one emoji that means today felt good. They put the phone down.
+    The whole interaction lasts under five seconds.
+  </p>
+  <p>
+    Over weeks, this small habit produces something they did not have before: a picture of their own life
+    that is both honest and beautiful. They see the morning hours they always assumed were lost.
+    They see the week they ran every day, and the next week they did not. They see, with no judgment,
+    where they actually spent their attention.
+  </p>
+
+  <h2>Who it is for</h2>
+  <p>
+    Chronos is not for everyone, and that is the point. It is built for the <strong>5–10% of people</strong>
+    who already keep journals, run, meditate, or otherwise notice themselves. They do not need to be convinced
+    to track. They need a tool that respects what they are doing.
+  </p>
+
+  <div class="two-col">
+    <div class="label-col">Persona / 用户画像</div>
+    <div>
+      <p style="margin-bottom: 12px;"><strong>Liwen, 32, product designer in Shanghai.</strong> Keeps a daily Notion log. Reads non-fiction. Wakes at 6:30 to swim. Owns three meditation apps. Frustrated that nothing she's tried for time tracking has felt designed.</p>
+      <p style="margin-bottom: 12px;"><strong>Sam, 28, software engineer in Berlin.</strong> Bilingual—German at work, English with friends. Cares deeply about data ownership. Has tried Toggl (too businesslike), RescueTime (creepy), and Daylio (too cute). Wants something quiet.</p>
+      <p><strong>Mei, 41, freelance translator in Taipei.</strong> Tracks her own hours but hates spreadsheets. Wants to understand if her freelance income justifies her hours. Already journals in Day One but wants the data layer.</p>
+    </div>
+  </div>
+
+  <div class="pull-quote reveal">
+    <blockquote>
+      "We don't want to fix your time. We want to help you see it. That's already enough."
+    </blockquote>
+    <cite>Product mantra / 产品咒语</cite>
+  </div>
+
+  <h2>What it deliberately is not</h2>
+
+  <table class="data-table">
+    <thead>
+      <tr><th>Not</th><th>Reasoning</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>A productivity tool</td><td>Productivity is a value judgment. Chronos refuses to tell users whether their day was "good." It only shows them what happened.</td></tr>
+      <tr><td>A habit tracker</td><td>Streaks and gamification corrode the relationship between user and tool. We measure cumulative days, never consecutive.</td></tr>
+      <tr><td>A social product</td><td>No friends, no sharing feeds, no public leaderboards. Solitary by design.</td></tr>
+      <tr><td>An AI assistant</td><td>AI features are sparingly used and never primary. The user is the one doing the noticing.</td></tr>
+      <tr><td>A workspace</td><td>Teams, projects, billing, exports to invoices—out of scope. Toggl exists for this.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============================================================ -->
+<!-- 03 - MARKET POSITION -->
+<!-- ============================================================ -->
+<section class="page">
+  <div class="section-number">03 · Market Position</div>
+  <h1 class="section-title reveal">A small, sharp wedge<br>in a <em>crowded</em> room.</h1>
+  <p class="section-lede reveal">
+    The market is not empty. It is loud, confused, and badly designed. That is the opportunity.
+  </p>
+
+  <h2>The competitive landscape</h2>
+
+  <table class="data-table">
+    <thead>
+      <tr><th>Product</th><th>Strength</th><th>Failure mode</th><th>Their position</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Toggl</td>
+        <td>Precise time tracking, project billing</td>
+        <td>Aesthetically utilitarian. Built for agencies, not lives.</td>
+        <td class="accent">Work hours</td>
+      </tr>
+      <tr>
+        <td>RescueTime</td>
+        <td>Automatic tracking of computer use</td>
+        <td>Surveillance feel. Data piles up without meaning.</td>
+        <td class="accent">Computer activity</td>
+      </tr>
+      <tr>
+        <td>Daylio</td>
+        <td>Mood tracking with mass appeal</td>
+        <td>Cartoonish design. Weak time data. Rainbow palette dates the product.</td>
+        <td class="accent">Daily mood</td>
+      </tr>
+      <tr>
+        <td>Day One</td>
+        <td>Rich journaling, sync, photos</td>
+        <td>Beautiful but text-heavy. No data visualization layer.</td>
+        <td class="accent">Long-form journal</td>
+      </tr>
+      <tr>
+        <td>aTimeLogger</td>
+        <td>Granular time categorization</td>
+        <td>Dated interface. Russian developer, limited polish.</td>
+        <td class="accent">Time categorization</td>
+      </tr>
+      <tr>
+        <td>Timing</td>
+        <td>Mac automatic tracking</td>
+        <td>Mac only. $96/year. Niche audience.</td>
+        <td class="accent">Power users</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>The Chronos wedge</h2>
+
+  <div class="principles">
+    <div class="principle reveal">
+      <div class="num">Vector 01</div>
+      <h4>Time + mood + reflection</h4>
+      <p>Toggl tracks time but ignores feeling. Daylio tracks feeling but ignores time. Chronos treats them as the same dataset.</p>
+    </div>
+    <div class="principle reveal">
+      <div class="num">Vector 02</div>
+      <h4>Editorial design language</h4>
+      <p>Most competitors look like consumer apps from 2018. Chronos uses serif display type, monochrome restraint, and the visual rules of fine print.</p>
+    </div>
+    <div class="principle reveal">
+      <div class="num">Vector 03</div>
+      <h4>Bilingual at the bone</h4>
+      <p>Chinese-speaking and English-speaking users get the same first-class experience. Most apps treat one as second-tier.</p>
+    </div>
+    <div class="principle reveal">
+      <div class="num">Vector 04</div>
+      <h4>Privacy as origin</h4>
+      <p>Local-first from day one, not bolted on. Apple Notes-grade trust applied to journaling.</p>
+    </div>
+  </div>
+
+  <div class="callout">
+    <span class="label">Strategic note</span>
+    We are not trying to win the time-tracking market. We are trying to define a new shelf next to it—
+    something like a <em>"reflective time companion"</em>—and own that shelf alone.
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 04 - DESIGN PHILOSOPHY -->
+<!-- ============================================================ -->
+<section class="page">
+  <div class="section-number">04 · Design Philosophy</div>
+  <h1 class="section-title reveal">The rules<br>we will not <em>break.</em></h1>
+  <p class="section-lede reveal">
+    Design decisions are not aesthetic preferences. They are operating principles. The following nine rules govern every screen.
+  </p>
+
+  <ol style="list-style: none; counter-reset: rule; margin: 48px 0;">
+    <li style="counter-increment: rule; padding: 28px 0; border-bottom: 0.5px solid var(--rule); display: grid; grid-template-columns: 60px 1fr; gap: 32px;">
+      <div style="font-family: var(--mono); font-size: 11px; letter-spacing: 0.15em; color: var(--ink-mute);">№ 01</div>
+      <div>
+        <h4 style="font-family: var(--serif); font-size: 24px; font-weight: 400; margin: 0 0 8px; letter-spacing: -0.01em;">One screen, one task.</h4>
+        <p style="margin: 0; color: var(--ink-soft); font-size: 14px;">Home is for recording. Stats is for seeing. Settings is for adjusting. We never blend these.</p>
+      </div>
+    </li>
+    <li style="counter-increment: rule; padding: 28px 0; border-bottom: 0.5px solid var(--rule); display: grid; grid-template-columns: 60px 1fr; gap: 32px;">
+      <div style="font-family: var(--mono); font-size: 11px; letter-spacing: 0.15em; color: var(--ink-mute);">№ 02</div>
+      <div>
+        <h4 style="font-family: var(--serif); font-size: 24px; font-weight: 400; margin: 0 0 8px; letter-spacing: -0.01em;">Hide by default.</h4>
+        <p style="margin: 0; color: var(--ink-soft); font-size: 14px;">Mood, notes, tags, subcategories—none of these appear in the first surface. The user reaches for them.</p>
+      </div>
+    </li>
+    <li style="counter-increment: rule; padding: 28px 0; border-bottom: 0.5px solid var(--rule); display: grid; grid-template-columns: 60px 1fr; gap: 32px;">
+      <div style="font-family: var(--mono); font-size: 11px; letter-spacing: 0.15em; color: var(--ink-mute);">№ 03</div>
+      <div>
+        <h4 style="font-family: var(--serif); font-size: 24px; font-weight: 400; margin: 0 0 8px; letter-spacing: -0.01em;">Whitespace earns its keep.</h4>
+        <p style="margin: 0; color: var(--ink-soft); font-size: 14px;">Empty space is content. We do not fill it because we can.</p>
+      </div>
+    </li>
+    <li style="counter-increment: rule; padding: 28px 0; border-bottom: 0.5px solid var(--rule); display: grid; grid-template-columns: 60px 1fr; gap: 32px;">
+      <div style="font-family: var(--mono); font-size: 11px; letter-spacing: 0.15em; color: var(--ink-mute);">№ 04</div>
+      <div>
+        <h4 style="font-family: var(--serif); font-size: 24px; font-weight: 400; margin: 0 0 8px; letter-spacing: -0.01em;">Color signals, never decorates.</h4>
+        <p style="margin: 0; color: var(--ink-soft); font-size: 14px;">The palette is monochrome with one exception. Color appears when it carries information. Otherwise—gray scale, paper, ink.</p>
+      </div>
+    </li>
+    <li style="counter-increment: rule; padding: 28px 0; border-bottom: 0.5px solid var(--rule); display: grid; grid-template-columns: 60px 1fr; gap: 32px;">
+      <div style="font-family: var(--mono); font-size: 11px; letter-spacing: 0.15em; color: var(--ink-mute);">№ 05</div>
+      <div>
+        <h4 style="font-family: var(--serif); font-size: 24px; font-weight: 400; margin: 0 0 8px; letter-spacing: -0.01em;">Animation has a purpose.</h4>
+        <p style="margin: 0; color: var(--ink-soft); font-size: 14px;">No movement for its own sake. Animation exists to acknowledge a user action or to make a transition legible. 180–240 ms, always eased.</p>
+      </div>
+    </li>
+    <li style="counter-increment: rule; padding: 28px 0; border-bottom: 0.5px solid var(--rule); display: grid; grid-template-columns: 60px 1fr; gap: 32px;">
+      <div style="font-family: var(--mono); font-size: 11px; letter-spacing: 0.15em; color: var(--ink-mute);">№ 06</div>
+      <div>
+        <h4 style="font-family: var(--serif); font-size: 24px; font-weight: 400; margin: 0 0 8px; letter-spacing: -0.01em;">Type does the heavy lifting.</h4>
+        <p style="margin: 0; color: var(--ink-soft); font-size: 14px;">Serif display + sans body. Three weights, no more. The page is structured by typography, not by color or shadow.</p>
+      </div>
+    </li>
+    <li style="counter-increment: rule; padding: 28px 0; border-bottom: 0.5px solid var(--rule); display: grid; grid-template-columns: 60px 1fr; gap: 32px;">
+      <div style="font-family: var(--mono); font-size: 11px; letter-spacing: 0.15em; color: var(--ink-mute);">№ 07</div>
+      <div>
+        <h4 style="font-family: var(--serif); font-size: 24px; font-weight: 400; margin: 0 0 8px; letter-spacing: -0.01em;">Tone is dry, not chirpy.</h4>
+        <p style="margin: 0; color: var(--ink-soft); font-size: 14px;">"Recorded." Not "Yay, you logged it! 🎉". Treat the user as an adult who chose to be here.</p>
+      </div>
+    </li>
+    <li style="counter-increment: rule; padding: 28px 0; border-bottom: 0.5px solid var(--rule); display: grid; grid-template-columns: 60px 1fr; gap: 32px;">
+      <div style="font-family: var(--mono); font-size: 11px; letter-spacing: 0.15em; color: var(--ink-mute);">№ 08</div>
+      <div>
+        <h4 style="font-family: var(--serif); font-size: 24px; font-weight: 400; margin: 0 0 8px; letter-spacing: -0.01em;">No streak shaming.</h4>
+        <p style="margin: 0; color: var(--ink-soft); font-size: 14px;">Missed days are shown as dotted outlines, never as red breaks. We count cumulative days, never consecutive.</p>
+      </div>
+    </li>
+    <li style="counter-increment: rule; padding: 28px 0; display: grid; grid-template-columns: 60px 1fr; gap: 32px;">
+      <div style="font-family: var(--mono); font-size: 11px; letter-spacing: 0.15em; color: var(--ink-mute);">№ 09</div>
+      <div>
+        <h4 style="font-family: var(--serif); font-size: 24px; font-weight: 400; margin: 0 0 8px; letter-spacing: -0.01em;">The data belongs to the user.</h4>
+        <p style="margin: 0; color: var(--ink-soft); font-size: 14px;">Always exportable. JSON and CSV from day one. No data lock-in, ever.</p>
+      </div>
+    </li>
+  </ol>
+
+  <div class="callout">
+    <span class="label">Field test</span>
+    Before any new feature ships, it must pass: <em>"Does this make the product simpler or more complex
+    in the user's experience?"</em> If the answer is "more complex," it does not ship—even if it is more
+    functional, more competitive, or more requested.
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 05 - VISUAL IDENTITY -->
+<!-- ============================================================ -->
+<section class="page">
+  <div class="section-number">05 · Visual Identity</div>
+  <h1 class="section-title reveal">A palette of <em>ash and ink,</em><br>with one cold accent.</h1>
+  <p class="section-lede reveal">
+    The visual system is built around a single restraint: monochrome gray, except where information demands otherwise.
+  </p>
+
+  <h2>Primary palette — Ash &amp; Ink</h2>
+  <p class="lede">
+    Six steps from the deepest ink to the warmest paper. This is the working palette for categories,
+    backgrounds, type, and structural rules. Note the warm undertone—true neutral gray would feel clinical.
+  </p>
+
+  <div class="palette">
+    <div class="palette-row">
+      <div class="name">Ash / 灰</div>
+      <div class="palette-swatches">
+        <div class="swatch dark" style="background:#2C2C2A">#2C2C2A</div>
+        <div class="swatch dark" style="background:#444441">#444441</div>
+        <div class="swatch dark" style="background:#5F5E5A">#5F5E5A</div>
+        <div class="swatch dark" style="background:#888780">#888780</div>
+        <div class="swatch light" style="background:#B4B2A9">#B4B2A9</div>
+        <div class="swatch light" style="background:#D3D1C7">#D3D1C7</div>
+      </div>
+    </div>
+    <div class="palette-row">
+      <div class="name">Paper / 纸</div>
+      <div class="palette-swatches">
+        <div class="swatch light" style="background:#F1EFE8">#F1EFE8</div>
+        <div class="swatch light" style="background:#FAF8F1">#FAF8F1</div>
+        <div class="swatch light" style="background:#EAE7DC">#EAE7DC</div>
+        <div class="swatch light" style="background:#FFFFFF; border: 0.5px solid #D3D1C7;">#FFFFFF</div>
+        <div></div>
+        <div></div>
+      </div>
+    </div>
+  </div>
+
+  <h2>Accent palette — Cold Blue</h2>
+
+  <div class="palette">
+    <div class="palette-row">
+      <div class="name">Blue / 蓝</div>
+      <div class="palette-swatches">
+        <div class="swatch light" style="background:#DCE7F4">L1</div>
+        <div class="swatch light" style="background:#A8C5E8">L2</div>
+        <div class="swatch dark" style="background:#5F94D1">L3</div>
+        <div class="swatch dark" style="background:#2E6BB3">L4</div>
+        <div class="swatch dark" style="background:#1A4480">L5</div>
+        <div class="swatch dark" style="background:#0C447C">L6</div>
+      </div>
+    </div>
+  </div>
+
+  <h2>Typography</h2>
+
+  <table class="data-table">
+    <thead>
+      <tr><th>Role</th><th>Family</th><th>Size</th><th>Weight</th><th>Sample</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Display</td><td>Fraunces</td><td>56–180px</td><td>300</td><td style="font-family: var(--serif); font-size: 22px; font-weight: 300;">Chronos.</td></tr>
+      <tr><td>Section</td><td>Fraunces</td><td>32px</td><td>400</td><td style="font-family: var(--serif); font-size: 18px;">Time is the only material</td></tr>
+      <tr><td>Body</td><td>Inter / Noto Sans SC</td><td>15px</td><td>400</td><td style="font-family: var(--sans); font-size: 15px;">A small daily habit, recorded.</td></tr>
+      <tr><td>Label</td><td>JetBrains Mono</td><td>11px</td><td>500</td><td style="font-family: var(--mono); font-size: 11px; letter-spacing: 0.15em;">Section 01</td></tr>
+      <tr><td>Numeral</td><td>Fraunces</td><td>36–64px</td><td>400</td><td style="font-family: var(--serif); font-size: 22px; font-variation-settings: 'opsz' 96;">6h 40m</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Iconography</h2>
+  <p>
+    Tabler Outline icons, 1.5px stroke. Never filled. Used sparingly, primarily for category symbols in dense lists.
+    Decorative icons—and emoji—are absent from the interface entirely.
+  </p>
+
+  <div class="callout">
+    <span class="label">Sample copy / 文案示例</span>
+    English: <em>"Recorded. Today's eleventh."</em><br>
+    中文: <em>"已记下。今天第十一笔。"</em>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 06 - FEATURE ARCHITECTURE -->
+<!-- ============================================================ -->
+<section class="page">
+  <div class="section-number">06 · Feature Architecture</div>
+  <h1 class="section-title reveal">Three rooms,<br>no <em>hallways.</em></h1>
+  <p class="section-lede reveal">
+    The application has exactly three primary surfaces. No bottom navigation, no hamburger menu—surfaces are reached by direct gesture.
+  </p>
+
+  <h2>Surface topology</h2>
+
+  <div class="timeline">
+    <div class="timeline-row reveal">
+      <div class="phase">Surface 01</div>
+      <div class="duration">Home</div>
+      <div class="content">
+        <h4>The recording surface</h4>
+        <p class="summary">Today's records. A single round button. Nothing else.</p>
+        <ul class="deliverables">
+          <li>Date and today's total time, top of screen</li>
+          <li>List of today's records in chronological order</li>
+          <li>Single FAB-style record button, centered bottom</li>
+          <li>Swipe right → Stats, swipe left → Settings</li>
+        </ul>
+      </div>
+    </div>
+    <div class="timeline-row reveal">
+      <div class="phase">Surface 02</div>
+      <div class="duration">Stats</div>
+      <div class="content">
+        <h4>The reflection surface</h4>
+        <p class="summary">Day, week, month, year views. Four toggles, one screen each.</p>
+        <ul class="deliverables">
+          <li>Pill toggle: Day · Week · Month · Year</li>
+          <li>Four summary metric cards at the top</li>
+          <li>Primary chart (ring / stacked bar / heatmap / pixel-year)</li>
+          <li>One-line AI observation at the bottom</li>
+        </ul>
+      </div>
+    </div>
+    <div class="timeline-row reveal">
+      <div class="phase">Surface 03</div>
+      <div class="duration">Settings</div>
+      <div class="content">
+        <h4>The adjustment surface</h4>
+        <p class="summary">Categories. Language. Theme. Data. Nothing more.</p>
+        <ul class="deliverables">
+          <li>Categories—up to 8, ordered manually</li>
+          <li>Language—Chinese / English / System</li>
+          <li>Appearance—Light / Dark / System</li>
+          <li>Data—Export JSON, Export CSV, Erase all</li>
+          <li>Privacy—Plain-language statement of where data lives</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <h2>Record entry — the critical flow</h2>
+
+  <ol class="task-list">
+    <li>
+      <span class="id">01</span>
+      <span class="name">
+        <strong>Tap +</strong>
+        <small>Round button, bottom center of home. 56×56 dp. Single tap.</small>
+      </span>
+      <span class="effort">~0.3 s</span>
+    </li>
+    <li>
+      <span class="id">02</span>
+      <span class="name">
+        <strong>Choose mode</strong>
+        <small>Two cards: <em>"Start timing"</em> or <em>"Log just now."</em> Tap once.</small>
+      </span>
+      <span class="effort">~0.5 s</span>
+    </li>
+    <li>
+      <span class="id">03</span>
+      <span class="name">
+        <strong>Enter name</strong>
+        <small>Cursor lands in the input automatically. Type. Autocomplete suggests based on history.</small>
+      </span>
+      <span class="effort">~2 s</span>
+    </li>
+    <li>
+      <span class="id">04</span>
+      <span class="name">
+        <strong>Confirm category &amp; duration</strong>
+        <small>Pre-filled from history. Tap to accept or change.</small>
+      </span>
+      <span class="effort">~1 s</span>
+    </li>
+    <li>
+      <span class="id">05</span>
+      <span class="name">
+        <strong>Optional mood</strong>
+        <small>Five circles. Tap one or skip.</small>
+      </span>
+      <span class="effort">~0.5 s</span>
+    </li>
+    <li>
+      <span class="id">06</span>
+      <span class="name">
+        <strong>Save</strong>
+        <small>Black bar at the bottom. One tap. Animation acknowledges. Returns to home.</small>
+      </span>
+      <span class="effort">~0.5 s</span>
+    </li>
+  </ol>
+
+  <h2>Category system</h2>
+
+  <table class="data-table">
+    <thead>
+      <tr><th>中文</th><th>English</th><th>Icon</th><th>Color</th><th>Covers</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>工作</td><td>Work</td><td>ti-briefcase</td><td><code>#2C2C2A</code></td><td>Job, projects, writing</td></tr>
+      <tr><td>学习</td><td>Learn</td><td>ti-book</td><td><code>#5F5E5A</code></td><td>Study, reading, courses</td></tr>
+      <tr><td>运动</td><td>Move</td><td>ti-run</td><td><code>#888780</code></td><td>Exercise, sports, walks</td></tr>
+      <tr><td>生活</td><td>Life</td><td>ti-home</td><td><code>#B4B2A9</code></td><td>Errands, cooking, family</td></tr>
+      <tr><td>社交</td><td>Social</td><td>ti-users</td><td><code>#C8C6BD</code></td><td>Friends, meetings, calls</td></tr>
+      <tr><td>休闲</td><td>Rest</td><td>ti-coffee</td><td><code>#D3D1C7</code></td><td>Entertainment, downtime</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============================================================ -->
+<!-- 07 - INFORMATION DESIGN -->
+<!-- ============================================================ -->
+<section class="page">
+  <div class="section-number">07 · Information Design</div>
+  <h1 class="section-title reveal">Four ways<br>to <em>see a self.</em></h1>
+  <p class="section-lede reveal">
+    Day, week, month, year. Each scale reveals a different question. Each chart is engineered to answer one question well.
+  </p>
+
+  <h2>Day · The donut</h2>
+  <p><strong>Question answered:</strong> Where did today's time go, proportionally?</p>
+
+  <h2>Week · The stacked bar</h2>
+  <p><strong>Question answered:</strong> Which days were dense? Which were empty? What does my week shape look like?</p>
+
+  <h2>Month · The heatmap</h2>
+  <p><strong>Question answered:</strong> What is my rhythm across weeks? Where are the dense and sparse stretches?</p>
+
+  <h2>Year · The pixel grid</h2>
+  <p><strong>Question answered:</strong> What did this year look like, all at once?</p>
+
+  <div class="callout">
+    <span class="label">Information hierarchy</span>
+    Every stats view follows the same vertical order: <em>scale toggle → four metric cards → primary chart → category legend → one-line observation.</em>
+  </div>
+
+  <h2>The metric cards</h2>
+
+  <table class="data-table">
+    <thead>
+      <tr><th>View</th><th>Card 1</th><th>Card 2</th><th>Card 3</th><th>Card 4</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Day</td><td>Total</td><td>Records</td><td>Top category</td><td>Mood avg</td></tr>
+      <tr><td>Week</td><td>Total</td><td>Daily avg</td><td>Most-focused day</td><td>Mood avg</td></tr>
+      <tr><td>Month</td><td>Total</td><td>Days recorded</td><td>Most-recorded day</td><td>Mood avg</td></tr>
+      <tr><td>Year</td><td>Total</td><td>Days recorded</td><td>Longest run</td><td>Mood avg</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============================================================ -->
+<!-- 08 - SIGNATURE VISUALIZATIONS -->
+<!-- ============================================================ -->
+<section class="page">
+  <div class="section-number">08 · Signature Visualizations</div>
+  <h1 class="section-title reveal">Three views<br>that <em>get screenshotted.</em></h1>
+  <p class="section-lede reveal">
+    Every product needs a moment people share. These are ours. Each one is built to be the picture someone posts when they say <em>"my year, by Chronos."</em>
+  </p>
+
+  <h2>Signature 01 · The River of Days</h2>
+  <p>
+    Seven rows, one per day of the week. Each row is a horizontal timeline from 0:00 to 24:00. Activities appear
+    as colored segments along the row, with sleep shown in the lightest paper-tone. The result resembles a series
+    of rivers—a week of one person's life seen from above.
+  </p>
+
+  <!-- LIVE RIVER OF DAYS VISUALIZATION -->
+  <div class="river-section reveal" id="river-container">
+    <div class="river-header">
+      <h3>River of Days <em style="font-family: var(--serif); font-weight: 300; color: var(--ink-soft);">— live rendering</em></h3>
+      <div class="river-sub">sample week · hover for detail</div>
+    </div>
+
+    <div class="river-legend" id="river-legend"></div>
+
+    <div id="river-canvas-wrap">
+      <svg id="river-svg" xmlns="http://www.w3.org/2000/svg"></svg>
+    </div>
+  </div>
+
+  <h2>Signature 02 · The Mirror</h2>
+  <p>
+    A vertical centerline splits the screen. To the left, last month's category bars extend leftward.
+    To the right, this month's bars extend rightward. A directional arrow per category indicates
+    growth or contraction.
+  </p>
+
+  <h2>Signature 03 · The Pixel Year</h2>
+  <p>
+    Twelve months, each rendered as a small grid of mood-shaded pixels. The year, in one image, on one screen.
+    Below, four small cards: average mood, brightest month, longest streak, deepest dip.
+  </p>
+
+  <!-- LIVE PIXEL YEAR VISUALIZATION -->
+  <div class="pixel-year-section reveal" id="pixel-year-container">
+    <div class="pixel-year-header">
+      <h3>Pixel Year <em style="font-family: var(--serif); font-weight: 300; color: var(--ink-soft);">— live rendering</em></h3>
+      <div style="font-family: var(--mono); font-size: 10px; letter-spacing: 0.15em; color: var(--ink-mute); text-transform: uppercase;">2026 · hover for date</div>
+    </div>
+    <svg id="pixel-year-svg" xmlns="http://www.w3.org/2000/svg"></svg>
+    <div class="pixel-stats" id="pixel-stats"></div>
+  </div>
+
+  <h2>Release sequence</h2>
+
+  <table class="data-table">
+    <thead>
+      <tr><th>Signature</th><th>Ships in</th><th>Reason</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>River of Days</td><td>v1.0</td><td>Strongest differentiator. Works with as little as one week of data.</td></tr>
+      <tr><td>Mirror</td><td>v1.2</td><td>Requires two months of data to be meaningful.</td></tr>
+      <tr><td>Pixel Year</td><td>v1.3 (year-end)</td><td>Should ship right before December as a marketing event.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============================================================ -->
+<!-- 09 - ONBOARDING -->
+<!-- ============================================================ -->
+<section class="page">
+  <div class="section-number">09 · Onboarding Experience</div>
+  <h1 class="section-title reveal">Four screens.<br>Then you're <em>in.</em></h1>
+  <p class="section-lede reveal">
+    The best onboarding is the one the user does not notice. Four screens, no account, no permissions, no fanfare.
+  </p>
+
+  <div class="timeline">
+    <div class="timeline-row reveal">
+      <div class="phase">Screen 01</div>
+      <div class="duration">Welcome</div>
+      <div class="content">
+        <h4>Five dots, one sentence, one button</h4>
+        <p class="summary">The five-circle mark, the words <em>"Notice your days,"</em> and a single button labeled <em>"Begin."</em></p>
+        <ul class="deliverables">
+          <li>No product features listed</li>
+          <li>No "skip" button—it's only four screens</li>
+          <li>Time on screen: under three seconds</li>
+        </ul>
+      </div>
+    </div>
+    <div class="timeline-row reveal">
+      <div class="phase">Screen 02</div>
+      <div class="duration">Promise</div>
+      <div class="content">
+        <h4>Three quiet commitments</h4>
+        <p class="summary">Stored only on your device. No account required. Your data is yours.</p>
+        <ul class="deliverables">
+          <li>Builds trust before asking for anything</li>
+          <li>Most apps hide this in settings. We put it second.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="timeline-row reveal">
+      <div class="phase">Screen 03</div>
+      <div class="duration">Language</div>
+      <div class="content">
+        <h4>Three cards, one preselected</h4>
+        <p class="summary">中文 · English · System default. Preselected based on the user's device locale.</p>
+        <ul class="deliverables">
+          <li>Bilingual-first product makes this choice explicit</li>
+          <li>UI language and content language are independent</li>
+        </ul>
+      </div>
+    </div>
+    <div class="timeline-row reveal">
+      <div class="phase">Screen 04</div>
+      <div class="duration">First record</div>
+      <div class="content">
+        <h4>The onboarding becomes the product</h4>
+        <p class="summary">Pre-filled text: <em>"opened this app."</em> Category: Learn. Duration: 1 minute. Tap save. Done.</p>
+        <ul class="deliverables">
+          <li>User completes their first real record</li>
+          <li>Psychological commitment: I've already begun</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 10 - AUTOMATION -->
+<!-- ============================================================ -->
+<section class="page">
+  <div class="section-number">10 · Automation Strategy</div>
+  <h1 class="section-title reveal">Make recording<br><em>nearly invisible.</em></h1>
+  <p class="section-lede reveal">
+    A five-level automation ladder reduces the cost of recording without ever removing the user's awareness of what they are recording.
+  </p>
+
+  <table class="data-table">
+    <thead>
+      <tr><th>Level</th><th>Mechanism</th><th>Friction reduced to</th><th>Privacy cost</th><th>Ships in</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>L1</td><td>Smart autocomplete</td><td>~3 s</td><td>None (local fuzzy match)</td><td class="accent">v1.0</td></tr>
+      <tr><td>L2</td><td>Context triggers (geofences, evening prompt)</td><td>~1 s</td><td>Low (all local)</td><td class="accent">v1.1</td></tr>
+      <tr><td>L3</td><td>System data import (calendar, health)</td><td>Confirmation only</td><td>Low (read-only, local)</td><td class="accent">v1.2</td></tr>
+      <tr><td>L4</td><td>Retrospective sliders (nightly mode)</td><td>~30 s for the whole day</td><td>None</td><td class="accent">v1.3</td></tr>
+      <tr><td>L5</td><td>AI inference (voice, freeform text)</td><td>~5 s to talk</td><td>Medium (on-device model preferred)</td><td class="accent">v2.0</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout">
+    <span class="label">Principle</span>
+    100% automation is the wrong target. The right target is making the user's decision-making
+    feel effortless while preserving their decision-making. We never log without confirmation.
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 11 - TECHNICAL ARCHITECTURE -->
+<!-- ============================================================ -->
+<section class="page">
+  <div class="section-number">11 · Technical Architecture</div>
+  <h1 class="section-title reveal">A stack chosen<br>for <em>two hands.</em></h1>
+  <p class="section-lede reveal">
+    The architecture is sized for a solo developer working part-time. Every choice optimizes for: low maintenance, high quality, minimal lock-in.
+  </p>
+
+  <table class="data-table">
+    <thead>
+      <tr><th>Layer</th><th>Choice</th><th>Why</th><th>Alternative considered</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Mobile framework</td><td>Flutter</td><td>Best cross-platform animation control.</td><td>React Native + Expo</td></tr>
+      <tr><td>Local storage</td><td>SQLite + SQLCipher</td><td>Battle-tested. Encryption built in.</td><td>—</td></tr>
+      <tr><td>Data structure</td><td>CRDT (Loro or Y.js)</td><td>Enables future E2E encrypted sync.</td><td>Last-write-wins sync</td></tr>
+      <tr><td>Cloud backend</td><td>Cloudflare Workers + D1 + R2</td><td>Free-tier covers first thousands of users.</td><td>Supabase</td></tr>
+      <tr><td>Cryptography</td><td>libsodium</td><td>Industry-standard. Never roll your own.</td><td>—</td></tr>
+      <tr><td>Key derivation</td><td>Argon2id</td><td>Resistant to GPU attacks. OWASP 2026.</td><td>PBKDF2 (legacy)</td></tr>
+      <tr><td>On-device AI</td><td>Core ML + Gemma 2B</td><td>Sufficient for one-line observations.</td><td>Cloud LLM</td></tr>
+      <tr><td>Internationalization</td><td>ICU MessageFormat</td><td>Handles plurals, dates, numbers correctly.</td><td>Simple string replacement</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Data schema</h2>
+
+  <pre style="font-family: var(--mono); font-size: 12px; background: var(--paper); padding: 24px; border: 0.5px solid var(--rule); margin: 24px 0; overflow-x: auto; line-height: 1.6;">
+records
+├─ id              uuid primary key
+├─ name            text not null
+├─ category_id     uuid → categories.id
+├─ duration_min    integer not null
+├─ started_at      timestamp
+├─ mood            integer (1–5, nullable)
+├─ note            text (nullable)
+├─ created_at      timestamp
+└─ updated_at      timestamp
+
+categories
+├─ id              uuid primary key
+├─ name_zh         text
+├─ name_en         text
+├─ icon            text (tabler key)
+├─ color           text (hex)
+├─ position        integer
+├─ is_default      boolean
+└─ created_at      timestamp
+
+settings
+├─ key             text primary key
+└─ value           jsonb</pre>
+
+  <div class="metrics reveal">
+    <div class="metric">
+      <div class="label">Year-1 fixed</div>
+      <div class="value">$99</div>
+      <div class="desc">Apple Developer Program. The only required spend.</div>
+    </div>
+    <div class="metric">
+      <div class="label">Optional</div>
+      <div class="value">$0–50</div>
+      <div class="desc">Domain, landing page hosting.</div>
+    </div>
+    <div class="metric">
+      <div class="label">Sync (if enabled)</div>
+      <div class="value">$0–10</div>
+      <div class="desc">First 10K users on Cloudflare free tier.</div>
+    </div>
+    <div class="metric">
+      <div class="label">Total Y1</div>
+      <div class="value">&lt; $300</div>
+      <div class="desc">Bootstrapped end-to-end.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 12 - PRIVACY -->
+<!-- ============================================================ -->
+<section class="page">
+  <div class="section-number">12 · Privacy Framework</div>
+  <h1 class="section-title reveal">A wall<br>between us and the <em>data.</em></h1>
+  <p class="section-lede reveal">
+    Privacy is not a feature in Chronos. It is the architecture. The product is engineered so that, even if we wanted to read user data, we technically cannot.
+  </p>
+
+  <table class="data-table">
+    <thead>
+      <tr><th>Tier</th><th>Where data lives</th><th>Who can read it</th><th>Default for</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>L1 — Local only</td><td>Encrypted SQLite on user's device</td><td>Only the user (via the app)</td><td>Every new user, forever, by default</td></tr>
+      <tr><td>L2 — Encrypted sync</td><td>User's device + opaque blobs on our server</td><td>Only the user (we hold ciphertext)</td><td>Users who opt in to multi-device</td></tr>
+      <tr><td>L3 — Server-readable</td><td>n/a</td><td>n/a</td><td>Never. We do not offer this tier.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="principles">
+    <div class="principle reveal">
+      <div class="num">№ 01</div>
+      <h4>No account at first launch</h4>
+      <p>The user can use Chronos forever without registering. No email, password, or phone field anywhere unless they request sync.</p>
+    </div>
+    <div class="principle reveal">
+      <div class="num">№ 02</div>
+      <h4>A visible privacy panel</h4>
+      <p>Settings → Privacy displays a plain-language summary: where your data is, what's encrypted, and your key's fingerprint.</p>
+    </div>
+    <div class="principle reveal">
+      <div class="num">№ 03</div>
+      <h4>Always exportable</h4>
+      <p>JSON and CSV export buttons in the data section. No "premium tier" gates export.</p>
+    </div>
+    <div class="principle reveal">
+      <div class="num">№ 04</div>
+      <h4>Account deletion is instant</h4>
+      <p>One button. Confirmation dialog. Server-side wipe within minutes.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 13 - ROADMAP -->
+<!-- ============================================================ -->
+<section class="page">
+  <div class="section-number">13 · Development Roadmap</div>
+  <h1 class="section-title reveal">Thirty-two weeks<br>to a <em>shipped product.</em></h1>
+  <p class="section-lede reveal">
+    A part-time pace: ten to twelve hours per week, eight months end-to-end, with one rest week every four.
+  </p>
+
+  <div class="timeline">
+    <div class="timeline-row reveal">
+      <div class="phase">Months 1–2</div>
+      <div class="duration">Foundation</div>
+      <div class="content">
+        <h4>Polish v0.1 → v0.3</h4>
+        <p class="summary">Take the existing web prototype to a mobile-first design with the gray palette properly applied.</p>
+        <ul class="deliverables">
+          <li>Mobile-first single-column layout</li>
+          <li>Six-step gray ramp on category chips</li>
+          <li>All four stats views functional</li>
+          <li>JSON and CSV export</li>
+        </ul>
+      </div>
+    </div>
+    <div class="timeline-row reveal">
+      <div class="phase">Months 3–4</div>
+      <div class="duration">Native</div>
+      <div class="content">
+        <h4>Port to native — Flutter mobile build</h4>
+        <p class="summary">Re-implement the web design as a Flutter app for iOS, with feature parity.</p>
+        <ul class="deliverables">
+          <li>Flutter project scaffolding with i18n, theming</li>
+          <li>SQLite + SQLCipher integration</li>
+          <li>Native iOS animations and transitions</li>
+          <li>Self-use for two weeks straight without breaking</li>
+        </ul>
+      </div>
+    </div>
+    <div class="timeline-row reveal">
+      <div class="phase">Months 5–6</div>
+      <div class="duration">Differentiators</div>
+      <div class="content">
+        <h4>The differentiators</h4>
+        <p class="summary">Polish, signature, and bilingual completion.</p>
+        <ul class="deliverables">
+          <li>River of Days chart — fully implemented</li>
+          <li>Blue accent year heatmap with tooltips</li>
+          <li>Smart autocomplete (L1 automation)</li>
+          <li>Full Chinese / English parity</li>
+          <li>Dark mode, all transitions tuned to 180–240ms</li>
+        </ul>
+      </div>
+    </div>
+    <div class="timeline-row reveal">
+      <div class="phase">Month 7</div>
+      <div class="duration">Beta</div>
+      <div class="content">
+        <h4>Beta — TestFlight closed</h4>
+        <p class="summary">Twenty to fifty hand-picked users. Daily feedback ingestion. No new features.</p>
+        <ul class="deliverables">
+          <li>App Store screenshots, copy, metadata</li>
+          <li>TestFlight submission and distribution</li>
+          <li>Track: D7 retention, daily records per user</li>
+        </ul>
+      </div>
+    </div>
+    <div class="timeline-row reveal">
+      <div class="phase">Month 8</div>
+      <div class="duration">Launch</div>
+      <div class="content">
+        <h4>Public launch — App Store, v1.0</h4>
+        <p class="summary">Hold the release for a Tuesday. Coordinate with build-in-public posts. Then take a week off.</p>
+        <ul class="deliverables">
+          <li>App Store live in CN, US, UK, JP, DE, AU regions</li>
+          <li>Launch posts on X, Indie Hackers, 小红书, Hacker News</li>
+          <li>Mandatory rest week post-launch</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <table class="data-table">
+    <thead>
+      <tr><th>Version</th><th>Quarter</th><th>Headline feature</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>v1.0</td><td>Q3 2026</td><td>Public launch, iOS only</td></tr>
+      <tr><td>v1.1</td><td>Q4 2026</td><td>Android port, evening prompt</td></tr>
+      <tr><td>v1.2</td><td>Q1 2027</td><td>The Mirror chart, calendar import (L3)</td></tr>
+      <tr><td>v1.3</td><td>Q2 2027</td><td>Pixel Year, Apple Health import, Widgets</td></tr>
+      <tr><td>v2.0</td><td>Q3 2027</td><td>Encrypted sync, Apple Watch, premium tier</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============================================================ -->
+<!-- 14 - GO TO MARKET -->
+<!-- ============================================================ -->
+<section class="page">
+  <div class="section-number">14 · Go-to-Market</div>
+  <h1 class="section-title reveal">Tell a small story<br>to the <em>right people.</em></h1>
+  <p class="section-lede reveal">
+    We do not need a thousand users on launch day. We need fifty users who will use the product every day for a month.
+  </p>
+
+  <table class="data-table">
+    <thead>
+      <tr><th>Stage</th><th>Channel</th><th>Goal</th><th>Tactic</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Seed (T-30 days)</td><td>Personal network, X DMs</td><td>20–50 TestFlight users</td><td>Direct ask. Custom invite. Friends who already journal.</td></tr>
+      <tr><td>Soft launch (T-0)</td><td>Build-in-public, X, IH</td><td>First 200 users</td><td>One thread about design decisions. One screenshot of the River of Days.</td></tr>
+      <tr><td>Public launch (T+1 week)</td><td>Product Hunt, 小红书, HN</td><td>1,000 users</td><td>PH "Tuesday launch." Three-piece RED carousel.</td></tr>
+      <tr><td>Sustain (T+1 month)</td><td>Owned channels</td><td>Word of mouth</td><td>Weekly post showing anonymized River charts (with permission).</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout">
+    <span class="label">The line</span>
+    Chronos is a quiet, bilingual companion for noticing how your days actually move—built for people
+    who keep journals, run before dawn, or otherwise pay attention to themselves.
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 15 - BUSINESS MODEL -->
+<!-- ============================================================ -->
+<section class="page">
+  <div class="section-number">15 · Business Model</div>
+  <h1 class="section-title reveal">Free for a year.<br>Then <em>politely</em> paid.</h1>
+  <p class="section-lede reveal">
+    No ads, no data harvesting, no aggressive paywall. The path to revenue is a small annual subscription.
+  </p>
+
+  <table class="data-table">
+    <thead>
+      <tr><th>Tier</th><th>Price</th><th>Includes</th><th>Cohort</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Free forever</td><td>$0</td><td>Full app, local-only, all charts, all categories, JSON/CSV export</td><td>Default for every new user</td></tr>
+      <tr><td>Chronos+</td><td>$2.99/mo or $24/yr</td><td>Encrypted multi-device sync, on-device AI summaries, Apple Watch, Widgets, Premium themes</td><td>~5–10% of active users at maturity</td></tr>
+      <tr><td>Lifetime</td><td>$59 one-time</td><td>Same as Chronos+, no recurring fee. Limited to first 1,000 supporters.</td><td>Early advocates</td></tr>
+    </tbody>
+  </table>
+
+  <div class="metrics reveal">
+    <div class="metric">
+      <div class="label">Y1 target</div>
+      <div class="value">3,000</div>
+      <div class="desc">total downloads, ≥30% organic</div>
+    </div>
+    <div class="metric">
+      <div class="label">Y2 target</div>
+      <div class="value">300</div>
+      <div class="desc">paying Chronos+ subscribers</div>
+    </div>
+    <div class="metric">
+      <div class="label">Y2 revenue</div>
+      <div class="value">$7K</div>
+      <div class="desc">annualized, after Apple's 15% small-business rate</div>
+    </div>
+    <div class="metric">
+      <div class="label">Definition of success</div>
+      <div class="value">Y3+</div>
+      <div class="desc">covers all hosting costs and an annual offsite week</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 16 - OPERATING CADENCE -->
+<!-- ============================================================ -->
+<section class="page">
+  <div class="section-number">16 · Operating Cadence</div>
+  <h1 class="section-title reveal">A pace<br>that will <em>not break you.</em></h1>
+  <p class="section-lede reveal">
+    The single largest risk is not the market, the technology, or the competition. It is the founder's energy running out. The cadence below is designed to survive that risk.
+  </p>
+
+  <table class="data-table">
+    <thead>
+      <tr><th>Day</th><th>Block</th><th>Activity</th><th>Hours</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Monday</td><td>—</td><td>Rest</td><td>0</td></tr>
+      <tr><td>Tuesday</td><td>Evening</td><td>Focused build — feature work</td><td>2</td></tr>
+      <tr><td>Wednesday</td><td>—</td><td>Rest</td><td>0</td></tr>
+      <tr><td>Thursday</td><td>Evening</td><td>Focused build — bug fixes &amp; polish</td><td>2</td></tr>
+      <tr><td>Friday</td><td>—</td><td>Use the product (no coding)</td><td>0</td></tr>
+      <tr><td>Saturday</td><td>Morning</td><td>Longer block — design or new feature</td><td>3–4</td></tr>
+      <tr><td>Sunday</td><td>Morning</td><td>Review, planning, ship</td><td>2</td></tr>
+    </tbody>
+  </table>
+
+  <div class="pull-quote reveal">
+    <blockquote>
+      You are not building a perfect product. You are completing a process.
+      The completion itself is the achievement.
+    </blockquote>
+    <cite>The note to return to / 给低谷的自己</cite>
+  </div>
+
+  <div class="principles">
+    <div class="principle reveal">
+      <div class="num">№ 01</div>
+      <h4>An accountability partner</h4>
+      <p>One person, same boat. A Sunday-night message exchange. Not advice—witness.</p>
+    </div>
+    <div class="principle reveal">
+      <div class="num">№ 02</div>
+      <h4>A weekly video diary</h4>
+      <p>30 seconds, every Saturday. Watch month one's video in month four. Progress is undeniable.</p>
+    </div>
+    <div class="principle reveal">
+      <div class="num">№ 03</div>
+      <h4>A founding document</h4>
+      <p>Why you started, written before the dip. Three to five honest reasons. Open it during month five.</p>
+    </div>
+    <div class="principle reveal">
+      <div class="num">№ 04</div>
+      <h4>An AI companion</h4>
+      <p>Continue using Claude or similar for product reasoning, code review, and emotional throughput. Available always, infinitely patient.</p>
+    </div>
+  </div>
+
+  <div class="divider-ornament">
+    <span class="ornament">§</span>
+  </div>
+
+  <h2 style="text-align: center; font-style: italic; margin-top: 0;">A final note.</h2>
+  <p style="text-align: center; max-width: 540px; margin-left: auto; margin-right: auto; font-family: var(--serif); font-size: 18px; line-height: 1.6; color: var(--ink-soft); font-style: italic;">
+    Most products that look effortless were nearly abandoned three times before release.
+    The work you are about to do is, in this sense, completely ordinary. The hard part is not the building.
+    The hard part is the staying. Stay.
+  </p>
+</section>
+
+<!-- ============================================================ -->
+<!-- COLOPHON -->
+<!-- ============================================================ -->
+<section class="colophon">
+  <div class="inner">
+    <h2>Colophon.</h2>
+    <p>
+      This document was set in Fraunces for display and Inter for text. Chinese type is set in Noto Sans SC.
+      Code and labels appear in JetBrains Mono. The palette is monochrome with a single chromatic exception.
+    </p>
+    <p>
+      The visualizations on page 08—the River of Days and the Pixel Year—are rendered live in the browser
+      from seeded sample data, using only SVG and vanilla JavaScript. They are exactly what the product
+      will generate from a user's real history.
+    </p>
+    <div class="signature">
+      <span>Drafted with care</span>
+      <span>2026</span>
+    </div>
+  </div>
+</section>
+
+<script>
+/* ============================================================ */
+/* SCROLL PROGRESS                                               */
+/* ============================================================ */
+(function () {
+  const bar = document.getElementById('scroll-progress');
+  document.addEventListener('scroll', () => {
+    const h = document.documentElement;
+    const pct = h.scrollTop / (h.scrollHeight - h.clientHeight);
+    bar.style.width = (pct * 100) + '%';
+  }, { passive: true });
+})();
+
+/* ============================================================ */
+/* LIVE CLOCK                                                    */
+/* ============================================================ */
+(function () {
+  const el = document.getElementById('live-clock');
+  function tick() {
+    const now = new Date();
+    const pad = n => String(n).padStart(2, '0');
+    el.textContent =
+      `Version 1.0 / ${now.getFullYear()} · ` +
+      `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+  }
+  tick();
+  setInterval(tick, 1000);
+})();
+
+/* ============================================================ */
+/* SCROLL REVEAL                                                 */
+/* ============================================================ */
+(function () {
+  const els = document.querySelectorAll('.reveal');
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        io.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.12 });
+  els.forEach(el => io.observe(el));
+})();
+
+/* ============================================================ */
+/* RIVER OF DAYS                                                 */
+/* ============================================================ */
+(function () {
+  const CATEGORIES = [
+    { key: 'work',   label: 'Work',   zh: '工作', color: '#2C2C2A' },
+    { key: 'learn',  label: 'Learn',  zh: '学习', color: '#5F5E5A' },
+    { key: 'move',   label: 'Move',   zh: '运动', color: '#888780' },
+    { key: 'life',   label: 'Life',   zh: '生活', color: '#B4B2A9' },
+    { key: 'social', label: 'Social', zh: '社交', color: '#C8C6BD' },
+    { key: 'rest',   label: 'Rest',   zh: '休闲', color: '#D3D1C7' },
+    { key: 'sleep',  label: 'Sleep',  zh: '睡眠', color: '#EAE7DC' },
+  ];
+
+  const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+  /* Sample week — minutes from midnight */
+  const WEEK = [
+    /* Mon */ [
+      { cat: 'sleep', s: 0, e: 420 },
+      { cat: 'move',  s: 420, e: 480 },
+      { cat: 'work',  s: 510, e: 750 },
+      { cat: 'learn', s: 750, e: 810 },
+      { cat: 'work',  s: 840, e: 1020 },
+      { cat: 'life',  s: 1020, e: 1110 },
+      { cat: 'rest',  s: 1110, e: 1200 },
+      { cat: 'sleep', s: 1380, e: 1440 },
+    ],
+    /* Tue */ [
+      { cat: 'sleep', s: 0, e: 390 },
+      { cat: 'work',  s: 480, e: 720 },
+      { cat: 'social',s: 720, e: 810 },
+      { cat: 'work',  s: 840, e: 1050 },
+      { cat: 'move',  s: 1080, e: 1140 },
+      { cat: 'rest',  s: 1140, e: 1260 },
+      { cat: 'sleep', s: 1380, e: 1440 },
+    ],
+    /* Wed */ [
+      { cat: 'sleep', s: 0, e: 450 },
+      { cat: 'learn', s: 450, e: 540 },
+      { cat: 'work',  s: 540, e: 780 },
+      { cat: 'life',  s: 780, e: 870 },
+      { cat: 'work',  s: 900, e: 1080 },
+      { cat: 'social',s: 1080, e: 1200 },
+      { cat: 'sleep', s: 1380, e: 1440 },
+    ],
+    /* Thu */ [
+      { cat: 'sleep', s: 0, e: 420 },
+      { cat: 'move',  s: 420, e: 480 },
+      { cat: 'work',  s: 510, e: 690 },
+      { cat: 'learn', s: 690, e: 780 },
+      { cat: 'work',  s: 810, e: 960 },
+      { cat: 'life',  s: 960, e: 1080 },
+      { cat: 'rest',  s: 1080, e: 1200 },
+      { cat: 'sleep', s: 1380, e: 1440 },
+    ],
+    /* Fri */ [
+      { cat: 'sleep', s: 0, e: 480 },
+      { cat: 'work',  s: 540, e: 780 },
+      { cat: 'social',s: 780, e: 960 },
+      { cat: 'rest',  s: 960, e: 1140 },
+      { cat: 'sleep', s: 1380, e: 1440 },
+    ],
+    /* Sat */ [
+      { cat: 'sleep', s: 0, e: 540 },
+      { cat: 'move',  s: 540, e: 660 },
+      { cat: 'learn', s: 660, e: 780 },
+      { cat: 'life',  s: 780, e: 960 },
+      { cat: 'social',s: 960, e: 1140 },
+      { cat: 'rest',  s: 1140, e: 1260 },
+      { cat: 'sleep', s: 1380, e: 1440 },
+    ],
+    /* Sun */ [
+      { cat: 'sleep', s: 0, e: 570 },
+      { cat: 'rest',  s: 570, e: 720 },
+      { cat: 'life',  s: 720, e: 870 },
+      { cat: 'learn', s: 870, e: 990 },
+      { cat: 'move',  s: 1020, e: 1080 },
+      { cat: 'social',s: 1080, e: 1200 },
+      { cat: 'sleep', s: 1380, e: 1440 },
+    ],
+  ];
+
+  const catMap = {};
+  CATEGORIES.forEach(c => catMap[c.key] = c);
+
+  /* Legend */
+  const legend = document.getElementById('river-legend');
+  CATEGORIES.forEach(c => {
+    const item = document.createElement('div');
+    item.className = 'river-legend-item';
+    item.innerHTML = `
+      <div class="river-legend-swatch" style="background:${c.color}; border: ${c.key === 'sleep' ? '0.5px solid #D3D1C7' : 'none'}"></div>
+      <span>${c.label} / ${c.zh}</span>`;
+    legend.appendChild(item);
+  });
+
+  /* SVG */
+  const svg = document.getElementById('river-svg');
+  const tooltip = document.getElementById('river-tooltip');
+
+  const LABEL_W = 40;
+  const ROW_H = 40;
+  const ROW_GAP = 10;
+  const HOUR_LABELS_H = 24;
+  const PADDING = 16;
+  const TOTAL_MINS = 1440;
+
+  function render() {
+    const containerW = svg.parentElement.clientWidth;
+    const chartW = containerW - LABEL_W - PADDING * 2;
+    const totalH = DAYS.length * (ROW_H + ROW_GAP) + HOUR_LABELS_H + PADDING * 2;
+
+    svg.setAttribute('viewBox', `0 0 ${containerW} ${totalH}`);
+    svg.setAttribute('width', containerW);
+    svg.setAttribute('height', totalH);
+    svg.innerHTML = '';
+
+    const ns = 'http://www.w3.org/2000/svg';
+
+    function el(tag, attrs, parent) {
+      const e = document.createElementNS(ns, tag);
+      Object.entries(attrs).forEach(([k, v]) => e.setAttribute(k, v));
+      if (parent) parent.appendChild(e);
+      return e;
+    }
+
+    /* Hour gridlines + labels */
+    for (let h = 0; h <= 24; h += 3) {
+      const x = LABEL_W + PADDING + (h / 24) * chartW;
+      el('line', {
+        x1: x, y1: HOUR_LABELS_H,
+        x2: x, y2: totalH - PADDING,
+        stroke: '#D3D1C7', 'stroke-width': 0.5,
+        'stroke-dasharray': h === 0 || h === 24 ? 'none' : '2 3'
+      }, svg);
+
+      if (h < 24) {
+        const label = el('text', {
+          x: x + 4,
+          y: HOUR_LABELS_H - 6,
+          fill: '#888780',
+          'font-family': "'JetBrains Mono', monospace",
+          'font-size': '9',
+          'letter-spacing': '0.05em',
+        }, svg);
+        label.textContent = h === 0 ? '0:00' : `${h}:00`;
+      }
+    }
+
+    /* Rows */
+    WEEK.forEach((dayBlocks, i) => {
+      const rowY = HOUR_LABELS_H + PADDING + i * (ROW_H + ROW_GAP);
+
+      /* Day label */
+      const dayLabel = el('text', {
+        x: 0, y: rowY + ROW_H / 2 + 4,
+        fill: '#888780',
+        'font-family': "'JetBrains Mono', monospace",
+        'font-size': '10',
+        'letter-spacing': '0.1em',
+        'text-anchor': 'start',
+      }, svg);
+      dayLabel.textContent = DAYS[i].toUpperCase();
+
+      /* Row background */
+      el('rect', {
+        x: LABEL_W + PADDING, y: rowY,
+        width: chartW, height: ROW_H,
+        fill: '#F1EFE8', rx: 4,
+      }, svg);
+
+      /* Activity segments */
+      dayBlocks.forEach(block => {
+        const cat = catMap[block.cat];
+        const x = LABEL_W + PADDING + (block.s / TOTAL_MINS) * chartW;
+        const w = ((block.e - block.s) / TOTAL_MINS) * chartW;
+        const rect = el('rect', {
+          x, y: rowY,
+          width: Math.max(w, 1), height: ROW_H,
+          fill: cat.color, rx: 2,
+          style: 'cursor: pointer; transition: opacity 0.15s;',
+        }, svg);
+
+        /* Tooltip */
+        const fmt = m => {
+          const h = Math.floor(m / 60), min = m % 60;
+          return `${String(h).padStart(2,'0')}:${String(min).padStart(2,'0')}`;
+        };
+        const dur = block.e - block.s;
+        const durStr = dur >= 60
+          ? `${Math.floor(dur/60)}h ${dur%60 > 0 ? dur%60 + 'm' : ''}`.trim()
+          : `${dur}m`;
+
+        rect.addEventListener('mouseenter', (ev) => {
+          tooltip.style.opacity = '1';
+          tooltip.textContent =
+            `${DAYS[i]} · ${cat.label} / ${cat.zh}  ${fmt(block.s)}–${fmt(block.e)}  (${durStr})`;
+          rect.setAttribute('opacity', '0.85');
+        });
+        rect.addEventListener('mousemove', (ev) => {
+          tooltip.style.left = (ev.clientX + 14) + 'px';
+          tooltip.style.top = (ev.clientY - 36) + 'px';
+        });
+        rect.addEventListener('mouseleave', () => {
+          tooltip.style.opacity = '0';
+          rect.setAttribute('opacity', '1');
+        });
+      });
+    });
+  }
+
+  render();
+  window.addEventListener('resize', render);
+})();
+
+/* ============================================================ */
+/* PIXEL YEAR                                                    */
+/* ============================================================ */
+(function () {
+  const BLUE = ['#EAE7DC', '#DCE7F4', '#A8C5E8', '#5F94D1', '#2E6BB3', '#1A4480'];
+  const today = new Date(2026, 4, 14); // May 14, 2026
+  const yearStart = new Date(2026, 0, 1);
+
+  /* Seed a deterministic pseudo-random sequence */
+  function seededRand(seed) {
+    let s = seed;
+    return function () {
+      s = (s * 1664525 + 1013904223) & 0xffffffff;
+      return (s >>> 0) / 0xffffffff;
+    };
+  }
+  const rand = seededRand(20260101);
+
+  /* Generate 365 days */
+  const days = [];
+  for (let i = 0; i < 365; i++) {
+    const d = new Date(yearStart);
+    d.setDate(d.getDate() + i);
+    const isPast = d <= today;
+    const intensity = isPast
+      ? Math.floor(rand() * 6)     // 0–5
+      : -1;                         // future
+    days.push({ date: d, intensity });
+  }
+
+  const svg = document.getElementById('pixel-year-svg');
+  const tooltip = document.getElementById('river-tooltip');
+  const ns = 'http://www.w3.org/2000/svg';
+
+  const CELL = 13;
+  const GAP = 3;
+  const MONTH_GAP = 8;
+  const TOP = 24;
+
+  /* Pre-calculate month column offsets */
+  const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const monthCols = Array(12).fill(0);
+  let col = 0;
+  for (let m = 0; m < 12; m++) {
+    monthCols[m] = col;
+    const daysInMonth = new Date(2026, m + 1, 0).getDate();
+    const weeks = Math.ceil(daysInMonth / 7);
+    col += weeks;
+  }
+  const totalCols = col + 11; /* add 11 inter-month gaps */
+
+  function colWithGaps(m, weekInMonth) {
+    return monthCols[m] + weekInMonth + m; /* m inter-month gaps */
+  }
+
+  function render() {
+    const containerW = svg.parentElement.clientWidth;
+    const cellW = (containerW - TOP) / (totalCols + 1);
+    const cellH = Math.min(cellW, CELL + GAP);
+    const svgH = TOP + 7 * cellH + 8;
+
+    svg.setAttribute('viewBox', `0 0 ${containerW} ${svgH}`);
+    svg.setAttribute('width', containerW);
+    svg.setAttribute('height', svgH);
+    svg.innerHTML = '';
+
+    function el(tag, attrs, parent) {
+      const e = document.createElementNS(ns, tag);
+      Object.entries(attrs).forEach(([k, v]) => e.setAttribute(k, v));
+      if (parent) parent.appendChild(e);
+      return e;
+    }
+
+    /* Month labels */
+    for (let m = 0; m < 12; m++) {
+      const x = TOP + colWithGaps(m, 0) * cellH;
+      const label = el('text', {
+        x, y: TOP - 8,
+        fill: '#888780',
+        'font-family': "'JetBrains Mono', monospace",
+        'font-size': '9',
+        'letter-spacing': '0.05em',
+      }, svg);
+      label.textContent = monthNames[m].toUpperCase();
+    }
+
+    /* Cells */
+    days.forEach(({ date, intensity }) => {
+      const m = date.getMonth();
+      const dayOfMonth = date.getDate() - 1;
+      const weekInMonth = Math.floor(dayOfMonth / 7);
+      const dayOfWeek = dayOfMonth % 7;
+
+      const cx = TOP + colWithGaps(m, weekInMonth) * cellH;
+      const cy = TOP + dayOfWeek * cellH;
+
+      const fill = intensity === -1 ? '#EAE7DC' : BLUE[intensity];
+      const opacity = intensity === -1 ? 0.35 : 1;
+
+      const rect = el('rect', {
+        x: cx, y: cy,
+        width: cellH - 3, height: cellH - 3,
+        rx: 2,
+        fill, opacity,
+        style: 'cursor: pointer; transition: opacity 0.12s;',
+      }, svg);
+
+      const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      const intStr = intensity === -1 ? 'future' : ['none','low','fair','good','great','peak'][intensity];
+
+      rect.addEventListener('mouseenter', (ev) => {
+        tooltip.style.opacity = '1';
+        tooltip.textContent = `${dateStr} · ${intStr}`;
+        rect.setAttribute('opacity', Math.min(parseFloat(opacity) * 0.75, 1));
+      });
+      rect.addEventListener('mousemove', (ev) => {
+        tooltip.style.left = (ev.clientX + 14) + 'px';
+        tooltip.style.top = (ev.clientY - 36) + 'px';
+      });
+      rect.addEventListener('mouseleave', () => {
+        tooltip.style.opacity = '0';
+        rect.setAttribute('opacity', opacity);
+      });
+    });
+  }
+
+  render();
+  window.addEventListener('resize', render);
+
+  /* Stats */
+  const pastDays = days.filter(d => d.intensity >= 0);
+  const recorded = pastDays.filter(d => d.intensity > 0);
+  const avgIntensity = recorded.length
+    ? (recorded.reduce((a, b) => a + b.intensity, 0) / recorded.length).toFixed(1)
+    : 0;
+
+  let longestRun = 0, curRun = 0;
+  pastDays.forEach(d => {
+    if (d.intensity > 0) { curRun++; longestRun = Math.max(longestRun, curRun); }
+    else curRun = 0;
+  });
+
+  const brightestMonth = (() => {
+    const totals = Array(12).fill(0);
+    recorded.forEach(d => totals[d.date.getMonth()] += d.intensity);
+    const max = Math.max(...totals);
+    return monthNames[totals.indexOf(max)];
+  })();
+
+  const statsEl = document.getElementById('pixel-stats');
+  [
+    { label: 'Days recorded', value: recorded.length },
+    { label: 'Avg intensity', value: avgIntensity + ' / 5' },
+    { label: 'Longest run', value: longestRun + ' days' },
+    { label: 'Brightest month', value: brightestMonth },
+  ].forEach(({ label, value }) => {
+    const d = document.createElement('div');
+    d.className = 'pixel-stat';
+    d.innerHTML = `<div class="label">${label}</div><div class="value">${value}</div>`;
+    statsEl.appendChild(d);
+  });
+})();
+</script>
+</body>
+</html>
