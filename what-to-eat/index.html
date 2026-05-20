@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>今天吃什么</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main id="app">
+    <header class="topbar">
+      <h1>今天吃什么</h1>
+      <button id="settings-btn" class="icon-btn" title="设置">设置</button>
+    </header>
+
+    <section id="main-view" class="view">
+      <div class="meal-selector" role="tablist" aria-label="餐别">
+        <button class="meal-tab" data-meal="breakfast" role="tab">早餐</button>
+        <button class="meal-tab" data-meal="lunch" role="tab">午餐</button>
+        <button class="meal-tab" data-meal="dinner" role="tab">晚餐</button>
+      </div>
+
+      <div class="mood-block">
+        <label for="mood-input">心情 / 想法（可选）</label>
+        <textarea id="mood-input" rows="2" placeholder="例：累了想清淡的、有点饿、约会、刚跑完步想吃肉..."></textarea>
+      </div>
+
+      <button id="decide-btn" class="big-btn">帮我决定</button>
+
+      <div id="result" class="result" hidden>
+        <div class="result-pick" id="pick"></div>
+        <div class="result-reason" id="reason"></div>
+        <div class="feedback-row">
+          <button class="fb-btn" data-fb="up">就这个</button>
+          <button class="fb-btn" data-fb="meh">还行</button>
+          <button class="fb-btn" data-fb="down">不要</button>
+          <button id="reroll" class="reroll-btn">换一个</button>
+        </div>
+      </div>
+
+      <div id="error" class="error" hidden></div>
+    </section>
+
+    <section id="settings-view" class="view" hidden>
+      <h2>设置</h2>
+
+      <div class="setting-block">
+        <label for="api-key">Anthropic API Key</label>
+        <input type="password" id="api-key" placeholder="sk-ant-...">
+        <p class="hint">仅保存在本地浏览器 localStorage。在 <a href="https://console.anthropic.com" target="_blank" rel="noopener">console.anthropic.com</a> 获取。</p>
+      </div>
+
+      <div class="setting-block">
+        <label for="model-select">模型</label>
+        <select id="model-select">
+          <option value="claude-opus-4-7">Opus 4.7（最强）</option>
+          <option value="claude-sonnet-4-6">Sonnet 4.6（平衡）</option>
+          <option value="claude-haiku-4-5">Haiku 4.5（便宜快）</option>
+        </select>
+      </div>
+
+      <div class="setting-block">
+        <h3>候选清单</h3>
+        <ul id="candidates-list"></ul>
+        <div class="add-row">
+          <input id="new-candidate" type="text" placeholder="加一个，例：兰州拉面" maxlength="30">
+          <button id="add-btn">添加</button>
+        </div>
+      </div>
+
+      <div class="setting-block">
+        <h3>最近记录</h3>
+        <ul id="history-list"></ul>
+        <button id="clear-history" class="danger-btn">清空历史</button>
+      </div>
+
+      <button id="back-btn" class="back-btn">返回</button>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
