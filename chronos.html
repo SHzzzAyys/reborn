@@ -2921,7 +2921,7 @@ let currentLang = 'en';
     // Update recording panel category labels and save button
     document.querySelectorAll('.rec-cat-btn').forEach(btn => {
       const cat = CATS.find(c => c.key === btn.dataset.catKey);
-      if (cat) btn.querySelector('span').textContent = lang === 'zh' ? cat.zh : cat.en;
+      if (cat) btn.querySelector('span:last-child').textContent = lang === 'zh' ? cat.zh : cat.en;
     });
     const saveBtn = document.getElementById('rec-save');
     if (saveBtn) saveBtn.textContent = lang === 'zh' ? '记下。' : 'Record.';
