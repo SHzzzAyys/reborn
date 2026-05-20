@@ -30,6 +30,9 @@
   --cat-6: #D3D1C7;
   --cat-sleep: #EAE7DC;
 
+  --accent-blue: #185FA5;
+  --accent-blue-soft: #DCE7F4;
+
   --serif: 'Fraunces', 'Noto Serif SC', Georgia, serif;
   --sans: 'Inter', 'Noto Sans SC', system-ui, sans-serif;
   --mono: 'JetBrains Mono', 'SF Mono', Menlo, monospace;
@@ -58,6 +61,9 @@
   --cat-5: #4A4A47;
   --cat-6: #3A3A37;
   --cat-sleep: #2A2A28;
+
+  --accent-blue: #5F94D1;
+  --accent-blue-soft: #1A2D45;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -1116,7 +1122,7 @@ code {
   right: 16px;
   display: flex;
   gap: 8px;
-  z-index: 900;
+  z-index: 998;
   font-family: var(--mono);
 }
 
@@ -1555,9 +1561,224 @@ code {
   .fixed-controls { top: 8px; right: 8px; }
   #section-indicator { bottom: 8px; right: 8px; max-width: calc(100vw - 16px); }
 }
+
+/* ============================================================ */
+/* APP PROTOTYPE VIEW                                            */
+/* ============================================================ */
+
+body.app-prototype > .cover,
+body.app-prototype > section.page,
+body.app-prototype > .colophon,
+body.app-prototype #scroll-progress,
+body.app-prototype #section-indicator,
+body.app-prototype #fab,
+body.app-prototype #rec-overlay,
+body.app-prototype #rec-panel,
+body.app-prototype #rec-toast { display: none; }
+
+body:not(.app-prototype) .entry-fab,
+body:not(.app-prototype) .entry-backdrop,
+body:not(.app-prototype) .entry-panel { display: none !important; }
+
+body.entry-open .entry-fab { opacity: 0; pointer-events: none; }
+
+.chronos-app {
+  min-height: 100vh;
+  padding: 88px 20px 120px;
+  display: grid;
+  place-items: center;
+}
+
+.app-device {
+  width: min(420px, 100%);
+  min-height: min(680px, calc(100vh - 176px));
+  background: var(--paper);
+  border: 0.5px solid var(--rule);
+  border-radius: 8px;
+  padding: 28px 22px 24px;
+  box-shadow: 0 18px 54px rgba(44,44,42,0.10);
+}
+:root.dark .app-device { box-shadow: 0 18px 54px rgba(0,0,0,0.28); }
+
+.app-topline {
+  display: flex; align-items: flex-start;
+  justify-content: space-between; gap: 20px; margin-bottom: 36px;
+}
+.app-kicker, .app-date {
+  font-family: var(--mono); font-size: 10px;
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-mute);
+}
+.app-total {
+  font-family: var(--serif); font-size: 34px; line-height: 1;
+  font-weight: 300; font-style: italic; color: var(--ink); margin-top: 8px;
+}
+.app-hero { margin-bottom: 28px; }
+.app-title {
+  font-family: var(--serif); font-size: clamp(40px, 10vw, 58px);
+  font-weight: 300; line-height: 0.98; max-width: 9ch;
+}
+.app-title em { color: var(--accent-blue); font-style: italic; }
+.app-lede {
+  margin-top: 16px; color: var(--ink-soft);
+  max-width: 32ch; line-height: 1.65; font-size: 13.5px;
+}
+.app-records { display: grid; gap: 10px; }
+.record-row {
+  display: grid; grid-template-columns: 54px 1fr auto;
+  align-items: center; gap: 12px;
+  border: 0.5px solid var(--rule); border-radius: 8px;
+  padding: 12px 12px; background: var(--bg);
+}
+.record-time {
+  font-family: var(--mono); font-size: 10px;
+  letter-spacing: 0.1em; color: var(--ink-mute); text-transform: uppercase;
+}
+.record-title { font-size: 14px; color: var(--ink); }
+.record-cat {
+  font-family: var(--mono); font-size: 9px;
+  letter-spacing: 0.1em; color: var(--ink-mute); text-transform: uppercase; margin-top: 2px;
+}
+.record-duration { font-family: var(--mono); font-size: 12px; color: var(--ink); }
+.app-empty-note {
+  color: var(--ink-mute); font-size: 13px;
+  font-style: italic; font-family: var(--serif); margin-top: 16px;
+}
+.app-view-doc {
+  display: block; margin-top: 28px;
+  font-family: var(--mono); font-size: 10px;
+  letter-spacing: 0.15em; text-transform: uppercase;
+  color: var(--ink-mute); background: none; border: none;
+  cursor: pointer; padding: 0;
+  text-decoration: underline; text-underline-offset: 3px;
+}
+.app-view-doc:hover { color: var(--ink); }
+
+/* ── New entry panel (Codex design) ── */
+.entry-fab {
+  position: fixed; left: 50%; bottom: 24px;
+  transform: translateX(-50%);
+  width: 64px; height: 64px; border-radius: 50%; border: 0;
+  background: var(--ink); color: var(--bg);
+  font-size: 32px; font-weight: 300;
+  cursor: pointer; z-index: 980;
+  box-shadow: 0 14px 36px rgba(44,44,42,0.24);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+  display: flex; align-items: center; justify-content: center;
+}
+.entry-fab:hover {
+  transform: translateX(-50%) translateY(-2px);
+  box-shadow: 0 18px 44px rgba(44,44,42,0.28);
+}
+.entry-backdrop {
+  position: fixed; inset: 0;
+  background: rgba(26,26,24,0.36);
+  opacity: 0; pointer-events: none; z-index: 970;
+  transition: opacity 0.2s ease;
+}
+.entry-backdrop.open { opacity: 1; pointer-events: auto; }
+.entry-panel {
+  position: fixed; left: 50%; bottom: 18px;
+  transform: translate(-50%, calc(100% + 40px));
+  width: min(430px, calc(100vw - 24px));
+  max-height: min(720px, calc(100vh - 34px));
+  overflow: auto; background: var(--paper);
+  border: 0.5px solid var(--rule); border-radius: 8px;
+  padding: 20px; z-index: 990;
+  box-shadow: 0 26px 70px rgba(26,26,24,0.30);
+  transition: transform 0.24s ease;
+}
+.entry-panel.open { transform: translate(-50%, 0); }
+.entry-header {
+  display: flex; align-items: flex-start;
+  justify-content: space-between; gap: 16px; margin-bottom: 16px;
+}
+.entry-meta {
+  font-family: var(--mono); font-size: 10px;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--ink-mute); margin-bottom: 4px;
+}
+.entry-title-h2 {
+  font-family: var(--serif); font-size: 28px;
+  line-height: 1.08; font-weight: 300;
+}
+.entry-close-btn {
+  width: 36px; height: 36px;
+  border: 0.5px solid var(--rule); border-radius: 8px;
+  background: transparent; color: var(--ink-soft);
+  font-size: 18px; cursor: pointer; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+.entry-close-btn:hover { border-color: var(--ink); color: var(--ink); }
+.entry-field { display: grid; gap: 7px; margin: 12px 0; }
+.entry-field-label {
+  font-family: var(--mono); font-size: 10px;
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-mute);
+}
+.entry-textarea {
+  width: 100%; min-height: 68px; resize: none;
+  border: 0.5px solid var(--rule); border-radius: 8px;
+  background: var(--bg); color: var(--ink);
+  font: 400 15px/1.55 var(--sans); padding: 10px 12px; outline: none;
+}
+.entry-textarea:focus {
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 0 3px var(--accent-blue-soft);
+}
+.entry-cat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+.entry-cat-btn {
+  min-height: 40px; border: 0.5px solid var(--rule);
+  border-radius: 8px; background: var(--bg); color: var(--ink);
+  font-family: var(--sans); font-size: 13px;
+  padding: 8px 6px; text-align: center;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  cursor: pointer; transition: all 0.15s;
+}
+.entry-cat-btn.active, .entry-cat-btn:hover {
+  border-color: var(--ink); background: var(--ink); color: var(--bg);
+}
+.entry-dur-row {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; border: 0.5px solid var(--rule); border-radius: 8px;
+  padding: 12px 14px; margin-top: 8px;
+}
+.entry-dur-val {
+  font-family: var(--serif); font-size: 24px;
+  font-weight: 300; color: var(--ink);
+}
+.entry-dur-btn {
+  width: 32px; height: 32px; border-radius: 50%;
+  border: 0.5px solid var(--rule); background: var(--bg); color: var(--ink);
+  font-size: 18px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s;
+}
+.entry-dur-btn:hover { border-color: var(--ink); }
+.entry-save-btn {
+  width: 100%; min-height: 48px; margin-top: 16px;
+  border: 0; border-radius: 8px;
+  background: var(--accent-blue); color: #fff;
+  font-family: var(--sans); font-size: 15px;
+  font-weight: 500; cursor: pointer; transition: opacity 0.15s;
+}
+.entry-save-btn:hover { opacity: 0.88; }
+
+#app-toast {
+  position: fixed; bottom: 100px; left: 50%;
+  transform: translateX(-50%);
+  background: var(--ink); color: var(--bg);
+  font-family: var(--mono); font-size: 11px;
+  letter-spacing: 0.05em; padding: 10px 18px;
+  border-radius: 4px; z-index: 995;
+  opacity: 0; transition: opacity 0.2s;
+  pointer-events: none; white-space: nowrap;
+}
 </style>
 </head>
-<body>
+<body class="app-prototype">
 
 <div id="scroll-progress"></div>
 <div id="river-tooltip"></div>
@@ -1569,6 +1790,7 @@ code {
     <button class="ctrl-btn" id="btn-zh" data-lang="zh">中</button>
   </div>
   <button class="ctrl-btn" id="dark-toggle" title="Toggle dark mode">○</button>
+  <button class="ctrl-btn" id="back-to-app-btn" title="Back to app" style="display:none" data-copy-en="← App" data-copy-zh="← 应用">← App</button>
 </div>
 <div id="section-indicator"><span class="num">01</span><span class="sep">·</span><span id="section-name">Executive Summary</span></div>
 
@@ -1617,6 +1839,68 @@ code {
 
 <!-- Toast -->
 <div id="rec-toast"></div>
+
+<!-- ============================================================ -->
+<!-- APP PROTOTYPE VIEW                                           -->
+<!-- ============================================================ -->
+<main class="chronos-app" id="chronos-app">
+  <section class="app-device">
+    <header class="app-topline">
+      <div>
+        <div class="app-kicker" data-copy-en="Today" data-copy-zh="今天">Today</div>
+        <div class="app-total" id="app-today-total">0m</div>
+      </div>
+      <div class="app-date" id="app-today-date"></div>
+    </header>
+
+    <section class="app-hero">
+      <h1 class="app-title" data-copy-en="Notice your &lt;em&gt;days.&lt;/em&gt;" data-copy-zh="看见你的&lt;em&gt;时间。&lt;/em&gt;" data-copy-html="true">Notice your <em>days.</em></h1>
+      <p class="app-lede" data-copy-en="A quiet place to record time and the small facts that make a day real." data-copy-zh="一个安静的地方，记录时间和让每天真实存在的小事。">
+        A quiet place to record time and the small facts that make a day real.
+      </p>
+    </section>
+
+    <div class="app-records" id="app-records-list"></div>
+
+    <button class="app-view-doc" id="app-view-doc-btn" data-copy-en="Read the engineering plan →" data-copy-zh="阅读工程计划 →">Read the engineering plan →</button>
+  </section>
+</main>
+
+<!-- New entry panel (Codex design, addEventListener-based) -->
+<button class="entry-fab" id="entry-fab" title="Record / 记录">+</button>
+<div class="entry-backdrop" id="entry-backdrop"></div>
+<div id="app-toast"></div>
+<section class="entry-panel" id="entry-panel" role="dialog" aria-modal="true" aria-hidden="true">
+  <div class="entry-header">
+    <div>
+      <div class="entry-meta" data-copy-en="New record" data-copy-zh="新记录">New record</div>
+      <h2 class="entry-title-h2" data-copy-en="What moved?" data-copy-zh="刚才做了什么？">What moved?</h2>
+    </div>
+    <button class="entry-close-btn" id="entry-close" type="button">×</button>
+  </div>
+
+  <div class="entry-field">
+    <span class="entry-field-label" data-copy-en="Note" data-copy-zh="记录">Note</span>
+    <textarea class="entry-textarea" id="entry-note"
+      data-placeholder-en="morning walk, reading, deep work..."
+      data-placeholder-zh="晨间散步、阅读、专注工作……"
+      placeholder="morning walk, reading, deep work..."></textarea>
+  </div>
+
+  <div class="entry-field">
+    <span class="entry-field-label" data-copy-en="Category" data-copy-zh="类别">Category</span>
+    <div class="entry-cat-grid" id="entry-cat-grid"></div>
+  </div>
+
+  <div class="entry-dur-row">
+    <span class="entry-field-label" data-copy-en="Duration" data-copy-zh="时长">Duration</span>
+    <button class="entry-dur-btn" id="entry-dur-minus" type="button">−</button>
+    <span class="entry-dur-val" id="entry-dur-val">25m</span>
+    <button class="entry-dur-btn" id="entry-dur-plus" type="button">+</button>
+  </div>
+
+  <button class="entry-save-btn" id="entry-save" type="button" data-copy-en="Save record" data-copy-zh="保存记录">Save record</button>
+</section>
 
 <!-- ============================================================ -->
 <!-- COVER -->
@@ -2914,10 +3198,22 @@ let currentLang = 'en';
   function applyLang(lang) {
     currentLang = lang;
     document.querySelectorAll('[data-lang]').forEach(btn => btn.classList.toggle('active', btn.dataset.lang === lang));
-    // Generic bilingual switch: any element with data-en / data-zh gets swapped
+    // Generic bilingual switch: data-zh (section titles etc.)
     document.querySelectorAll('[data-zh]').forEach(el => {
       if (el.dataset[lang]) el.innerHTML = el.dataset[lang];
     });
+    // Codex app-prototype elements use data-copy-en / data-copy-zh
+    document.querySelectorAll('[data-copy-en]').forEach(el => {
+      const text = lang === 'zh' ? el.dataset.copyZh : el.dataset.copyEn;
+      if (!text) return;
+      if (el.dataset.copyHtml === 'true') el.innerHTML = text;
+      else el.textContent = text;
+    });
+    document.querySelectorAll('[data-placeholder-en]').forEach(el => {
+      el.setAttribute('placeholder', lang === 'zh' ? el.dataset.placeholderZh : el.dataset.placeholderEn);
+    });
+    if (window._updateAppView) window._updateAppView();
+    if (window._updateAppDateDisplay) window._updateAppDateDisplay();
     // Update recording panel category labels and save button
     document.querySelectorAll('.rec-cat-btn').forEach(btn => {
       const cat = CATS.find(c => c.key === btn.dataset.catKey);
@@ -3542,6 +3838,182 @@ const WEEK = [
   window._updateTodayPanel = updateTodayPanel;
   setDuration(30);
   updateTodayPanel();
+})();
+
+/* ============================================================ */
+/* APP PROTOTYPE RECORDING (new Codex-design entry panel)       */
+/* ============================================================ */
+(function () {
+  let entries = JSON.parse(localStorage.getItem('chronos-entries') || '[]');
+  let selCat = 'work';
+  let dur = 25;
+
+  const fab     = document.getElementById('entry-fab');
+  const backdrop= document.getElementById('entry-backdrop');
+  const panel   = document.getElementById('entry-panel');
+  const closeBtn= document.getElementById('entry-close');
+  const noteEl  = document.getElementById('entry-note');
+  const durVal  = document.getElementById('entry-dur-val');
+  const durMinus= document.getElementById('entry-dur-minus');
+  const durPlus = document.getElementById('entry-dur-plus');
+  const saveBtn = document.getElementById('entry-save');
+  const catGrid = document.getElementById('entry-cat-grid');
+  const toast   = document.getElementById('app-toast');
+
+  /* Category buttons */
+  CATS.filter(c => c.key !== 'sleep').forEach(c => {
+    const btn = document.createElement('button');
+    btn.className = 'entry-cat-btn' + (c.key === 'work' ? ' active' : '');
+    btn.type = 'button';
+    btn.dataset.catKey = c.key;
+    btn.dataset.copyEn = c.en;
+    btn.dataset.copyZh = c.zh;
+    btn.textContent = c.en;
+    btn.addEventListener('click', () => {
+      selCat = c.key;
+      catGrid.querySelectorAll('.entry-cat-btn').forEach(b => b.classList.toggle('active', b.dataset.catKey === c.key));
+    });
+    catGrid.appendChild(btn);
+  });
+
+  /* Duration */
+  function setDur(v) {
+    dur = Math.max(5, Math.min(480, v));
+    const h = Math.floor(dur/60), m = dur%60;
+    durVal.textContent = h > 0 ? (m > 0 ? h+'h '+m+'m' : h+'h') : m+'m';
+  }
+  durMinus.addEventListener('click', () => setDur(dur - 5));
+  durPlus.addEventListener('click',  () => setDur(dur + 5));
+  setDur(25);
+
+  /* Open / close */
+  function openPanel() {
+    panel.classList.add('open'); backdrop.classList.add('open');
+    panel.setAttribute('aria-hidden','false');
+    document.body.classList.add('entry-open');
+    setTimeout(() => noteEl && noteEl.focus(), 120);
+  }
+  function closePanel() {
+    panel.classList.remove('open'); backdrop.classList.remove('open');
+    panel.setAttribute('aria-hidden','true');
+    document.body.classList.remove('entry-open');
+  }
+
+  fab.addEventListener('click', openPanel);
+  backdrop.addEventListener('click', closePanel);
+  closeBtn.addEventListener('click', closePanel);
+  document.addEventListener('keydown', e => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    if (e.key === 'n' || e.key === 'N') {
+      if (document.body.classList.contains('app-prototype')) openPanel();
+    }
+    if (e.key === 'Escape') closePanel();
+  });
+
+  /* Utilities */
+  function fmtDur(m) {
+    const h = Math.floor(m/60), mn = m%60;
+    return h > 0 ? (mn > 0 ? h+'h '+mn+'m' : h+'h') : mn+'m';
+  }
+  function todayKey() { return new Date().toISOString().slice(0,10); }
+
+  /* Save */
+  saveBtn.addEventListener('click', () => {
+    const name = (noteEl.value || '').trim();
+    if (!name) { noteEl.focus(); return; }
+    const entry = { id: Date.now(), name, cat: selCat, duration: dur, date: todayKey(), ts: new Date().toISOString() };
+    entries.push(entry);
+    try { localStorage.setItem('chronos-entries', JSON.stringify(entries)); } catch {}
+
+    updateAppView();
+    const n = entries.filter(e => e.date === todayKey()).length;
+    const ord = [,'st','nd','rd'][n] || 'th';
+    showAppToast(currentLang === 'zh' ? `已记下。今天第${n}笔。` : `Recorded. Today's ${n}${ord}.`);
+
+    noteEl.value = '';
+    selCat = 'work';
+    catGrid.querySelectorAll('.entry-cat-btn').forEach(b => b.classList.toggle('active', b.dataset.catKey === 'work'));
+    setDur(25);
+    closePanel();
+  });
+
+  /* Update app prototype today list */
+  function updateAppView() {
+    const lang = currentLang;
+    const today = todayKey();
+    const todayList = entries.filter(e => e.date === today);
+    const total = todayList.reduce((s, e) => s + e.duration, 0);
+
+    const totalEl = document.getElementById('app-today-total');
+    if (totalEl) totalEl.textContent = total > 0 ? fmtDur(total) : '0m';
+
+    const listEl = document.getElementById('app-records-list');
+    if (!listEl) return;
+    listEl.innerHTML = '';
+    if (todayList.length === 0) {
+      const p = document.createElement('p');
+      p.className = 'app-empty-note';
+      p.textContent = lang === 'zh' ? '第一笔记录从现在开始。' : 'The first record starts now.';
+      listEl.appendChild(p);
+    } else {
+      todayList.slice(-4).reverse().forEach(e => {
+        const cat = CMAP[e.cat] || CATS[0];
+        const t = new Date(e.ts);
+        const pad = n => String(n).padStart(2,'0');
+        const art = document.createElement('article');
+        art.className = 'record-row';
+        art.innerHTML =
+          '<div class="record-time">'+pad(t.getHours())+':'+pad(t.getMinutes())+'</div>' +
+          '<div><div class="record-title">'+e.name+'</div>' +
+          '<div class="record-cat">'+(lang==='zh'?cat.zh:cat.en)+'</div></div>' +
+          '<div class="record-duration">'+fmtDur(e.duration)+'</div>';
+        listEl.appendChild(art);
+      });
+    }
+  }
+
+  /* Date display */
+  function updateDateDisplay() {
+    const el = document.getElementById('app-today-date');
+    if (!el) return;
+    const now = new Date();
+    const lang = currentLang;
+    const dEn = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    const dZh = ['周日','周一','周二','周三','周四','周五','周六'];
+    const mEn = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    el.textContent = lang === 'zh'
+      ? (now.getMonth()+1)+'月'+now.getDate()+'日，'+dZh[now.getDay()]
+      : dEn[now.getDay()]+', '+mEn[now.getMonth()]+' '+now.getDate();
+  }
+
+  /* Toast */
+  let toastTimer;
+  function showAppToast(msg) {
+    toast.textContent = msg;
+    toast.style.opacity = '1';
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { toast.style.opacity = '0'; }, 2500);
+  }
+
+  /* View doc toggle */
+  const viewDocBtn = document.getElementById('app-view-doc-btn');
+  const backBtn = document.getElementById('back-to-app-btn');
+  if (viewDocBtn) viewDocBtn.addEventListener('click', () => {
+    document.body.classList.remove('app-prototype');
+    if (backBtn) backBtn.style.display = '';
+    window.scrollTo(0, 0);
+  });
+  if (backBtn) backBtn.addEventListener('click', () => {
+    document.body.classList.add('app-prototype');
+    backBtn.style.display = 'none';
+    window.scrollTo(0, 0);
+  });
+
+  /* Init */
+  updateAppView();
+  updateDateDisplay();
+  window._updateAppView = updateAppView;
+  window._updateAppDateDisplay = updateDateDisplay;
 })();
 </script>
 </body>
