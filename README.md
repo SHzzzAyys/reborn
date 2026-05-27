@@ -95,3 +95,9 @@
 49. [选书的基本原则(C03.md)](C03.md)
 50. [正确高效使用 Google(C04.md)](C04.md)
 51. [大部分群聊是浪费生命(C05.md)](C05.md)
+
+## 工具 / Tools
+
+- [what-to-eat.html](what-to-eat.html) — 🍱 AI 辅助选餐助手
+- [chronos.html](chronos.html) — ⏱ 时间追踪看板
+- [keywords.py](keywords.py) — 🔍 零依赖中文关键词提取

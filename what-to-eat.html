@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>今天吃什么？🍱</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --orange: #FF6B35;
+    --orange-light: #FF8C5A;
+    --orange-pale: #FFF0EA;
+    --gray-100: #F8F8F8;
+    --gray-200: #EFEFEF;
+    --gray-400: #BDBDBD;
+    --gray-600: #757575;
+    --gray-800: #424242;
+    --gray-900: #212121;
+    --white: #FFFFFF;
+    --shadow-sm: 0 1px 4px rgba(0,0,0,0.08);
+    --shadow-md: 0 4px 16px rgba(0,0,0,0.10);
+    --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
+    --radius: 16px;
+    --radius-sm: 10px;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", sans-serif;
+    background: var(--gray-100);
+    color: var(--gray-900);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 24px 16px 60px;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 480px;
+  }
+
+  /* ── Header ── */
+  .header {
+    text-align: center;
+    margin-bottom: 28px;
+  }
+  .header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--gray-900);
+    letter-spacing: -0.5px;
+    margin-bottom: 6px;
+  }
+  .header p {
+    color: var(--gray-600);
+    font-size: 0.9rem;
+  }
+
+  /* ── Card ── */
+  .card {
+    background: var(--white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-md);
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+  .card-title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--gray-400);
+    margin-bottom: 14px;
+  }
+
+  /* ── Preference Toggles ── */
+  .pref-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .pref-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 16px;
+    border-radius: 50px;
+    border: 2px solid var(--gray-200);
+    background: var(--white);
+    color: var(--gray-700, #555);
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    user-select: none;
+  }
+  .pref-btn:hover {
+    border-color: var(--orange-light);
+    background: var(--orange-pale);
+  }
+  .pref-btn.active {
+    border-color: var(--orange);
+    background: var(--orange);
+    color: var(--white);
+    box-shadow: 0 2px 8px rgba(255,107,53,0.3);
+  }
+
+  /* ── Main Button ── */
+  .btn-pick {
+    width: 100%;
+    padding: 16px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--white);
+    background: var(--orange);
+    border: none;
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: all 0.18s ease;
+    box-shadow: 0 4px 16px rgba(255,107,53,0.35);
+    letter-spacing: 0.02em;
+  }
+  .btn-pick:hover {
+    background: var(--orange-light);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(255,107,53,0.4);
+  }
+  .btn-pick:active { transform: translateY(0); }
+
+  /* ── Result Cards ── */
+  .results {
+    display: none;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .results.visible { display: flex; }
+
+  .result-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    animation: slideIn 0.3s ease both;
+  }
+  .result-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .result-card:nth-child(1) { animation-delay: 0.00s; }
+  .result-card:nth-child(2) { animation-delay: 0.08s; }
+  .result-card:nth-child(3) { animation-delay: 0.16s; }
+
+  .result-emoji {
+    font-size: 2.2rem;
+    flex-shrink: 0;
+    width: 52px;
+    height: 52px;
+    background: var(--orange-pale);
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .result-info { flex: 1; }
+  .result-name {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--gray-900);
+    margin-bottom: 3px;
+  }
+  .result-tags {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+    margin-bottom: 5px;
+  }
+  .tag {
+    font-size: 0.7rem;
+    padding: 2px 8px;
+    border-radius: 50px;
+    background: var(--orange-pale);
+    color: var(--orange);
+    font-weight: 600;
+  }
+  .result-desc {
+    font-size: 0.82rem;
+    color: var(--gray-600);
+    line-height: 1.4;
+  }
+  .result-meta {
+    font-size: 0.75rem;
+    color: var(--gray-400);
+    margin-top: 4px;
+  }
+  .btn-fav {
+    background: none;
+    border: none;
+    font-size: 1.4rem;
+    cursor: pointer;
+    transition: transform 0.15s;
+    flex-shrink: 0;
+    padding: 4px;
+    line-height: 1;
+  }
+  .btn-fav:hover { transform: scale(1.25); }
+  .btn-fav.loved { animation: heartBeat 0.35s ease; }
+  @keyframes heartBeat {
+    0%   { transform: scale(1); }
+    50%  { transform: scale(1.4); }
+    100% { transform: scale(1); }
+  }
+
+  /* ── Re-pick Button ── */
+  .btn-repick {
+    width: 100%;
+    padding: 13px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--orange);
+    background: var(--orange-pale);
+    border: 2px solid var(--orange-pale);
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: all 0.18s ease;
+    margin-bottom: 16px;
+    display: none;
+  }
+  .btn-repick.visible { display: block; }
+  .btn-repick:hover {
+    border-color: var(--orange);
+    background: var(--white);
+  }
+
+  /* ── AI Suggestion Banner ── */
+  .ai-banner {
+    background: linear-gradient(135deg, #FFF7F4 0%, #FFF0EA 100%);
+    border: 1.5px solid #FFD5C0;
+    border-radius: var(--radius-sm);
+    padding: 14px 16px;
+    font-size: 0.88rem;
+    color: var(--gray-800);
+    margin-bottom: 16px;
+    display: none;
+    line-height: 1.6;
+    min-height: 54px;
+  }
+  .ai-banner.visible { display: block; }
+  .ai-banner .ai-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--orange);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    margin-bottom: 5px;
+  }
+  .ai-spinner {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border: 2px solid var(--orange-pale);
+    border-top-color: var(--orange);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    vertical-align: middle;
+    margin-right: 6px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── Favourites Section ── */
+  .fav-section {
+    background: var(--white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+  .fav-section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+  }
+  .fav-title {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--gray-800);
+  }
+  .btn-clear-fav {
+    font-size: 0.75rem;
+    color: var(--gray-400);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition: color 0.15s;
+  }
+  .btn-clear-fav:hover { color: #E53935; }
+  .fav-empty {
+    color: var(--gray-400);
+    font-size: 0.85rem;
+    text-align: center;
+    padding: 12px 0;
+  }
+  .fav-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .fav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    background: var(--gray-100);
+    border-radius: var(--radius-sm);
+    font-size: 0.88rem;
+    color: var(--gray-800);
+  }
+  .fav-item-emoji { font-size: 1.1rem; }
+  .fav-item-name { font-weight: 600; flex: 1; }
+  .fav-item-date { font-size: 0.72rem; color: var(--gray-400); }
+
+  /* ── DeepSeek API Config ── */
+  .ai-config {
+    background: var(--white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+  .ai-config-toggle {
+    width: 100%;
+    background: none;
+    border: none;
+    padding: 14px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--gray-600);
+    transition: background 0.15s;
+  }
+  .ai-config-toggle:hover { background: var(--gray-100); }
+  .ai-config-toggle .chevron {
+    transition: transform 0.2s;
+    font-size: 0.75rem;
+    color: var(--gray-400);
+  }
+  .ai-config-toggle.open .chevron { transform: rotate(180deg); }
+  .ai-config-body {
+    display: none;
+    padding: 0 20px 20px;
+    border-top: 1px solid var(--gray-200);
+  }
+  .ai-config-body.open { display: block; }
+  .ai-config-body label {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--gray-600);
+    margin-bottom: 6px;
+    margin-top: 14px;
+  }
+  .ai-config-body input {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1.5px solid var(--gray-200);
+    border-radius: var(--radius-sm);
+    font-size: 0.9rem;
+    color: var(--gray-900);
+    background: var(--gray-100);
+    transition: border-color 0.15s;
+    outline: none;
+  }
+  .ai-config-body input:focus { border-color: var(--orange); background: var(--white); }
+  .ai-privacy-note {
+    font-size: 0.74rem;
+    color: var(--gray-400);
+    margin-top: 8px;
+    line-height: 1.5;
+  }
+  .ai-privacy-note span { color: var(--orange); }
+  .btn-save-key {
+    margin-top: 12px;
+    padding: 9px 20px;
+    background: var(--orange);
+    color: var(--white);
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .btn-save-key:hover { background: var(--orange-light); }
+  .key-saved-msg {
+    font-size: 0.78rem;
+    color: #4CAF50;
+    margin-top: 6px;
+    display: none;
+  }
+  .key-saved-msg.visible { display: block; }
+
+  /* ── Toast ── */
+  .toast {
+    position: fixed;
+    bottom: 28px;
+    left: 50%;
+    transform: translateX(-50%) translateY(60px);
+    background: var(--gray-900);
+    color: var(--white);
+    padding: 10px 20px;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    pointer-events: none;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    opacity: 0;
+    z-index: 999;
+    white-space: nowrap;
+  }
+  .toast.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- Header -->
+  <div class="header">
+    <h1>今天吃什么？🍱</h1>
+    <p>告诉我你的偏好，让我帮你挑一道</p>
+  </div>
+
+  <!-- Preference Filters -->
+  <div class="card">
+    <div class="card-title">我想要…</div>
+    <div class="pref-grid">
+      <button class="pref-btn" data-pref="辣" onclick="togglePref(this)">🌶️ 偏辣</button>
+      <button class="pref-btn" data-pref="素食" onclick="togglePref(this)">🥗 素食</button>
+      <button class="pref-btn" data-pref="快捷" onclick="togglePref(this)">⚡ 快捷 &lt;15 min</button>
+      <button class="pref-btn" data-pref="经济" onclick="togglePref(this)">💰 经济 &lt;20 元</button>
+    </div>
+  </div>
+
+  <!-- Pick Button -->
+  <button class="btn-pick" onclick="pickMeals()">帮我选！</button>
+
+  <!-- AI Suggestion Banner -->
+  <div class="ai-banner" id="ai-banner">
+    <div class="ai-label">✨ AI 今日饮食建议</div>
+    <div id="ai-text"></div>
+  </div>
+
+  <!-- Results -->
+  <div class="results" id="results"></div>
+
+  <!-- Re-pick Button -->
+  <button class="btn-repick" id="btn-repick" onclick="pickMeals()">🔀 再选一次</button>
+
+  <!-- Favourites -->
+  <div class="fav-section">
+    <div class="fav-section-header">
+      <div class="fav-title">❤️ 我的收藏</div>
+      <button class="btn-clear-fav" onclick="clearFavourites()">清空</button>
+    </div>
+    <div id="fav-list">
+      <div class="fav-empty">还没有收藏，点击推荐卡上的 ❤️ 收藏</div>
+    </div>
+  </div>
+
+  <!-- DeepSeek API Config (collapsed by default) -->
+  <div class="ai-config">
+    <button class="ai-config-toggle" id="ai-config-toggle" onclick="toggleAiConfig()">
+      <span>🔑 配置 AI 增强（可选）</span>
+      <span class="chevron">▼</span>
+    </button>
+    <div class="ai-config-body" id="ai-config-body">
+      <label for="api-key-input">DeepSeek API Key</label>
+      <input
+        type="password"
+        id="api-key-input"
+        placeholder="sk-xxxxxxxxxxxxxxxx"
+        autocomplete="off"
+        spellcheck="false"
+      >
+      <p class="ai-privacy-note">
+        <span>🔒 Key 仅存储在您本地浏览器（localStorage），不会上传任何服务器。</span><br>
+        有了 Key 后，每次推荐结束会自动调用 DeepSeek 生成今日饮食建议。
+      </p>
+      <button class="btn-save-key" onclick="saveApiKey()">保存</button>
+      <div class="key-saved-msg" id="key-saved-msg">✓ 已保存</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================
+   MENU DATA — 44 dishes
+   tags: "辣" | "素食" | "快捷" | "经济"
+   time: minutes  |  price: CNY
+============================================================ */
+const MENU = [
+  { name: "宫保鸡丁",     emoji: "🍗", tags: ["辣"],                    time: 20, price: 25, desc: "经典川菜，酸甜辣口，色泽红亮" },
+  { name: "番茄炒蛋",     emoji: "🍳", tags: ["快捷","素食","经济"],     time: 10, price: 15, desc: "家常快手菜，百搭下饭" },
+  { name: "麻婆豆腐",     emoji: "🫘", tags: ["辣","经济","素食"],       time: 15, price: 18, desc: "麻辣鲜香，下饭神器" },
+  { name: "清炒时蔬",     emoji: "🥬", tags: ["快捷","素食","经济"],     time: 8,  price: 12, desc: "清淡健康，简单美味" },
+  { name: "酸辣粉",       emoji: "🍜", tags: ["辣","经济","快捷"],       time: 12, price: 15, desc: "酸爽开胃，热腾腾的" },
+  { name: "皮蛋瘦肉粥",   emoji: "🥣", tags: ["快捷","经济"],            time: 20, price: 16, desc: "软糯暖胃，早餐宵夜都行" },
+  { name: "蒜蓉粉丝蒸虾", emoji: "🦐", tags: [],                        time: 25, price: 45, desc: "鲜甜嫩滑，宴客首选" },
+  { name: "红烧肉",       emoji: "🥩", tags: [],                        time: 60, price: 35, desc: "肥而不腻，入口即化" },
+  { name: "鸡蛋炒饭",     emoji: "🍳", tags: ["快捷","经济"],            time: 10, price: 12, desc: "快手主食，随时来一碗" },
+  { name: "牛肉拉面",     emoji: "🍜", tags: [],                        time: 15, price: 28, desc: "劲道面条，浓郁汤底" },
+  { name: "炸鸡汉堡",     emoji: "🍔", tags: ["快捷","经济"],            time: 5,  price: 18, desc: "外脆里嫩，快餐首选" },
+  { name: "凯撒沙拉",     emoji: "🥗", tags: ["快捷","素食","经济"],     time: 8,  price: 18, desc: "清爽低卡，满满蔬菜" },
+  { name: "三明治",       emoji: "🥪", tags: ["快捷","经济"],            time: 5,  price: 15, desc: "便携早餐，随拿随走" },
+  { name: "便当套餐",     emoji: "🍱", tags: ["经济"],                   time: 0,  price: 18, desc: "荤素搭配，营养均衡" },
+  { name: "煎饼果子",     emoji: "🌯", tags: ["快捷","经济"],            time: 5,  price: 12, desc: "北方早餐经典，香脆可口" },
+  { name: "肉夹馍",       emoji: "🫓", tags: ["快捷","经济"],            time: 5,  price: 14, desc: "关中名吃，肥而不腻" },
+  { name: "阳春面",       emoji: "🍝", tags: ["快捷","素食","经济"],     time: 10, price: 10, desc: "清汤细面，朴实温暖" },
+  { name: "炸酱面",       emoji: "🍝", tags: ["经济"],                   time: 15, price: 15, desc: "豆瓣酱拌面，北京传统" },
+  { name: "热干面",       emoji: "🍝", tags: ["快捷","经济"],            time: 10, price: 12, desc: "武汉早餐，芝麻酱香浓" },
+  { name: "刀削面",       emoji: "🍝", tags: ["经济"],                   time: 15, price: 16, desc: "厚实筋道，汤底鲜美" },
+  { name: "黄焖鸡米饭",   emoji: "🍗", tags: ["经济"],                   time: 0,  price: 16, desc: "卤味鸡肉，浇汁拌饭绝了" },
+  { name: "盖浇饭",       emoji: "🍚", tags: ["经济"],                   time: 0,  price: 14, desc: "浇头多样，实惠管饱" },
+  { name: "咖喱饭",       emoji: "🍛", tags: ["经济"],                   time: 15, price: 18, desc: "香浓咖喱，土豆软糯" },
+  { name: "南瓜粥",       emoji: "🎃", tags: ["快捷","素食","经济"],     time: 15, price: 10, desc: "甜糯暖胃，秋冬首选" },
+  { name: "馄饨",         emoji: "🥟", tags: ["快捷","经济"],            time: 10, price: 14, desc: "皮薄馅多，汤鲜味美" },
+  { name: "酸辣汤",       emoji: "🥣", tags: ["辣","快捷","经济"],       time: 12, price: 12, desc: "酸辣开胃，驱寒暖身" },
+  { name: "凉拌豆腐",     emoji: "🫘", tags: ["快捷","素食","经济"],     time: 5,  price: 10, desc: "嫩滑清爽，夏日解暑" },
+  { name: "蒸南瓜",       emoji: "🎃", tags: ["快捷","素食","经济"],     time: 15, price: 8,  desc: "甜软清甜，健康低卡" },
+  { name: "炒豆芽",       emoji: "🌱", tags: ["快捷","素食","经济"],     time: 8,  price: 8,  desc: "脆嫩爽口，简单下饭" },
+  { name: "素三鲜",       emoji: "🥦", tags: ["素食","经济"],            time: 15, price: 12, desc: "三种素菜合炒，清香可口" },
+  { name: "夫妻肺片",     emoji: "🥩", tags: ["辣"],                    time: 0,  price: 28, desc: "麻辣鲜香，成都经典凉菜" },
+  { name: "水煮鱼",       emoji: "🐟", tags: ["辣"],                    time: 20, price: 35, desc: "辣汤滚沸，鱼片嫩滑" },
+  { name: "回锅肉",       emoji: "🥩", tags: ["辣"],                    time: 20, price: 25, desc: "蒜苗爆炒五花肉，香辣下饭" },
+  { name: "口水鸡",       emoji: "🍗", tags: ["辣"],                    time: 0,  price: 25, desc: "红油浇汁，嫩滑多汁" },
+  { name: "糖醋里脊",     emoji: "🍖", tags: ["快捷"],                  time: 18, price: 28, desc: "酥脆甜酸，老少皆宜" },
+  { name: "蛋花汤",       emoji: "🥚", tags: ["快捷","素食","经济"],     time: 8,  price: 8,  desc: "轻盈暖胃，简单料理" },
+  { name: "葱油拌面",     emoji: "🍝", tags: ["快捷","素食","经济"],     time: 8,  price: 10, desc: "葱油浓郁，上海家常" },
+  { name: "担担面",       emoji: "🍜", tags: ["辣","经济"],             time: 12, price: 15, desc: "麻辣芝麻酱，成都街头小吃" },
+  { name: "鸡蛋羹",       emoji: "🥚", tags: ["快捷","素食","经济"],     time: 12, price: 8,  desc: "嫩滑如豆腐，老人孩子爱" },
+  { name: "烤红薯",       emoji: "🍠", tags: ["快捷","素食","经济"],     time: 10, price: 8,  desc: "甜糯绵软，街头零食" },
+  { name: "鱼香肉丝",     emoji: "🥩", tags: ["辣"],                    time: 18, price: 22, desc: "咸甜酸辣兼具，川菜代表" },
+  { name: "西红柿鸡蛋面", emoji: "🍝", tags: ["快捷","经济"],           time: 12, price: 12, desc: "酸甜番茄汤面，治愈一切" },
+  { name: "小笼包",       emoji: "🥟", tags: ["经济"],                  time: 0,  price: 16, desc: "汤汁丰盈，皮薄馅鲜" },
+  { name: "韩式拌饭",     emoji: "🍚", tags: ["辣","素食"],             time: 15, price: 22, desc: "蔬菜五彩，拌匀即食" },
+];
+
+/* ============================================================
+   STATE
+============================================================ */
+let activePrefs = new Set();
+let lastPicks   = [];
+let favourites  = JSON.parse(localStorage.getItem('wte-favs') || '[]');
+
+/* ============================================================
+   PREFERENCE TOGGLE
+============================================================ */
+function togglePref(btn) {
+  const pref = btn.dataset.pref;
+  if (activePrefs.has(pref)) {
+    activePrefs.delete(pref);
+    btn.classList.remove('active');
+  } else {
+    activePrefs.add(pref);
+    btn.classList.add('active');
+  }
+}
+
+/* ============================================================
+   PICK ALGORITHM — weighted random
+   Dishes matching active prefs score higher.
+   No prefs selected → all dishes equally eligible.
+============================================================ */
+function computeWeight(dish) {
+  if (activePrefs.size === 0) return 1;
+  let matches = 0;
+  activePrefs.forEach(p => { if (dish.tags.includes(p)) matches++; });
+  // 0 matches: still 0.15 weight so they rarely appear but aren't excluded
+  return matches === 0 ? 0.15 : matches;
+}
+
+function weightedSample(arr, weights, k) {
+  const pool = arr.map((item, i) => ({ item, w: weights[i] }));
+  const picked = [];
+  for (let i = 0; i < k && pool.length > 0; i++) {
+    const total = pool.reduce((s, x) => s + x.w, 0);
+    let r = Math.random() * total;
+    let idx = 0;
+    for (; idx < pool.length - 1; idx++) {
+      r -= pool[idx].w;
+      if (r <= 0) break;
+    }
+    picked.push(pool[idx].item);
+    pool.splice(idx, 1);
+  }
+  return picked;
+}
+
+function pickMeals() {
+  const weights = MENU.map(computeWeight);
+  const picks   = weightedSample(MENU, weights, 3);
+  lastPicks     = picks;
+  renderResults(picks);
+  fetchAiSuggestion(picks);
+}
+
+/* ============================================================
+   RENDER RESULTS
+============================================================ */
+function tagLabel(t) {
+  return { "辣": "🌶️辣", "素食": "🥗素食", "快捷": "⚡快捷", "经济": "💰经济" }[t] || t;
+}
+
+function renderResults(picks) {
+  const container = document.getElementById('results');
+  container.innerHTML = '';
+  picks.forEach((dish, i) => {
+    const favKey = `${dish.name}`;
+    const isFav  = favourites.some(f => f.name === dish.name);
+
+    const card = document.createElement('div');
+    card.className = 'result-card';
+    card.innerHTML = `
+      <div class="result-emoji">${dish.emoji}</div>
+      <div class="result-info">
+        <div class="result-name">${dish.name}</div>
+        <div class="result-tags">
+          ${dish.tags.map(t => `<span class="tag">${tagLabel(t)}</span>`).join('')}
+        </div>
+        <div class="result-desc">${dish.desc}</div>
+        <div class="result-meta">约 ${dish.time > 0 ? dish.time + ' min' : '立取'} · ¥${dish.price}</div>
+      </div>
+      <button class="btn-fav${isFav ? ' loved' : ''}" title="收藏" onclick="toggleFav(this, ${i})">${isFav ? '❤️' : '🤍'}</button>
+    `;
+    container.appendChild(card);
+  });
+
+  container.classList.add('visible');
+  document.getElementById('btn-repick').classList.add('visible');
+}
+
+/* ============================================================
+   FAVOURITES
+============================================================ */
+function toggleFav(btn, pickIdx) {
+  const dish  = lastPicks[pickIdx];
+  const idx   = favourites.findIndex(f => f.name === dish.name);
+  if (idx >= 0) {
+    favourites.splice(idx, 1);
+    btn.textContent = '🤍';
+    btn.classList.remove('loved');
+    showToast(`已取消收藏 ${dish.name}`);
+  } else {
+    favourites.unshift({
+      name:  dish.name,
+      emoji: dish.emoji,
+      date:  new Date().toLocaleDateString('zh-CN'),
+    });
+    btn.textContent = '❤️';
+    btn.classList.add('loved');
+    showToast(`已收藏 ${dish.emoji} ${dish.name}`);
+  }
+  localStorage.setItem('wte-favs', JSON.stringify(favourites));
+  renderFavourites();
+}
+
+function renderFavourites() {
+  const container = document.getElementById('fav-list');
+  if (favourites.length === 0) {
+    container.innerHTML = '<div class="fav-empty">还没有收藏，点击推荐卡上的 ❤️ 收藏</div>';
+    return;
+  }
+  const list = document.createElement('div');
+  list.className = 'fav-list';
+  favourites.slice(0, 10).forEach(f => {
+    const item = document.createElement('div');
+    item.className = 'fav-item';
+    item.innerHTML = `
+      <span class="fav-item-emoji">${f.emoji}</span>
+      <span class="fav-item-name">${f.name}</span>
+      <span class="fav-item-date">${f.date}</span>
+    `;
+    list.appendChild(item);
+  });
+  container.innerHTML = '';
+  container.appendChild(list);
+}
+
+function clearFavourites() {
+  if (favourites.length === 0) return;
+  favourites = [];
+  localStorage.setItem('wte-favs', JSON.stringify(favourites));
+  renderFavourites();
+  showToast('收藏已清空');
+}
+
+/* ============================================================
+   DEEPSEEK AI SUGGESTION
+============================================================ */
+function getApiKey() {
+  return localStorage.getItem('wte-dskey') || '';
+}
+
+async function fetchAiSuggestion(picks) {
+  const key = getApiKey();
+  if (!key) return;
+
+  const banner = document.getElementById('ai-banner');
+  const text   = document.getElementById('ai-text');
+  banner.classList.add('visible');
+  text.innerHTML = '<span class="ai-spinner"></span>正在生成今日饮食建议…';
+
+  const names = picks.map(p => p.name).join('、');
+  const prompt = `今天推荐吃：${names}。请用一两句话给出今日饮食的温馨建议，注意营养均衡，语气轻松活泼，不超过50字。`;
+
+  try {
+    const resp = await fetch('https://api.deepseek.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${key}`,
+      },
+      body: JSON.stringify({
+        model: 'deepseek-chat',
+        messages: [{ role: 'user', content: prompt }],
+        max_tokens: 80,
+        temperature: 0.8,
+      }),
+    });
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    const data = await resp.json();
+    const reply = data.choices?.[0]?.message?.content?.trim() || '今天也要好好吃饭哦！';
+    text.textContent = reply;
+  } catch (e) {
+    text.textContent = '今天也要好好吃饭，注意营养均衡！😊';
+  }
+}
+
+/* ============================================================
+   AI CONFIG PANEL
+============================================================ */
+function toggleAiConfig() {
+  const toggle = document.getElementById('ai-config-toggle');
+  const body   = document.getElementById('ai-config-body');
+  const isOpen = body.classList.toggle('open');
+  toggle.classList.toggle('open', isOpen);
+}
+
+function saveApiKey() {
+  const val = document.getElementById('api-key-input').value.trim();
+  if (val) {
+    localStorage.setItem('wte-dskey', val);
+  } else {
+    localStorage.removeItem('wte-dskey');
+  }
+  const msg = document.getElementById('key-saved-msg');
+  msg.classList.add('visible');
+  setTimeout(() => msg.classList.remove('visible'), 2000);
+}
+
+/* ============================================================
+   TOAST
+============================================================ */
+let toastTimer = null;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+/* ============================================================
+   INIT
+============================================================ */
+(function init() {
+  // Restore saved API key to input
+  const savedKey = getApiKey();
+  if (savedKey) {
+    document.getElementById('api-key-input').value = savedKey;
+  }
+  // Render favourites
+  renderFavourites();
+})();
+</script>
+</body>
+</html>

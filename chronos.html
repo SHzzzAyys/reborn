@@ -1211,6 +1211,132 @@ code {
 }
 
 /* ============================================================ */
+/* STICKY SECTION NAV (left sidebar)                            */
+/* ============================================================ */
+
+#section-nav {
+  position: fixed;
+  top: 50%;
+  left: 20px;
+  transform: translateY(-50%);
+  z-index: 800;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 80vh;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+
+#section-nav::-webkit-scrollbar { display: none; }
+
+.section-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  text-decoration: none;
+  padding: 4px 0;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.2s;
+  background: none;
+  border: none;
+  line-height: 1.2;
+}
+
+.section-nav-item::before {
+  content: "";
+  display: block;
+  width: 12px;
+  height: 0.5px;
+  background: var(--ink-faint);
+  flex-shrink: 0;
+  transition: width 0.2s, background 0.2s;
+}
+
+.section-nav-item:hover {
+  color: var(--ink-soft);
+}
+
+.section-nav-item:hover::before {
+  background: var(--ink-soft);
+  width: 18px;
+}
+
+.section-nav-item.active {
+  color: var(--ink);
+}
+
+.section-nav-item.active::before {
+  width: 20px;
+  background: var(--ink);
+}
+
+.section-nav-label {
+  opacity: 0;
+  transform: translateX(-4px);
+  transition: opacity 0.2s, transform 0.2s;
+  pointer-events: none;
+}
+
+#section-nav:hover .section-nav-label {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+@media (max-width: 768px) {
+  #section-nav { display: none; }
+}
+
+/* ============================================================ */
+/* LIVE CHART BADGE                                              */
+/* ============================================================ */
+
+.chart-wrapper {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+}
+
+.live-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  background: var(--paper);
+  border: 0.5px solid var(--rule);
+  padding: 4px 8px;
+  border-radius: 2px;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.live-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #c0392b;
+  animation: live-pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes live-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.75); }
+}
+
+/* ============================================================ */
 /* RESPONSIVE */
 /* ============================================================ */
 
@@ -1652,6 +1778,27 @@ body.entry-open .fab-button {
 </div>
 <div id="section-indicator"><span class="num">01</span><span class="sep">·</span><span id="section-name">Executive Summary</span></div>
 
+<!-- Sticky left section nav -->
+<nav id="section-nav" aria-label="Section navigation">
+  <a class="section-nav-item active" data-target="sec-toc" href="#sec-toc"><span class="section-nav-label">TOC</span></a>
+  <a class="section-nav-item" data-target="sec-01" href="#sec-01"><span class="section-nav-label">01 · Summary</span></a>
+  <a class="section-nav-item" data-target="sec-02" href="#sec-02"><span class="section-nav-label">02 · Vision</span></a>
+  <a class="section-nav-item" data-target="sec-03" href="#sec-03"><span class="section-nav-label">03 · Market</span></a>
+  <a class="section-nav-item" data-target="sec-04" href="#sec-04"><span class="section-nav-label">04 · Design</span></a>
+  <a class="section-nav-item" data-target="sec-05" href="#sec-05"><span class="section-nav-label">05 · Visual</span></a>
+  <a class="section-nav-item" data-target="sec-06" href="#sec-06"><span class="section-nav-label">06 · Features</span></a>
+  <a class="section-nav-item" data-target="sec-07" href="#sec-07"><span class="section-nav-label">07 · Info Design</span></a>
+  <a class="section-nav-item" data-target="sec-08" href="#sec-08"><span class="section-nav-label">08 · Viz</span></a>
+  <a class="section-nav-item" data-target="sec-09" href="#sec-09"><span class="section-nav-label">09 · Onboarding</span></a>
+  <a class="section-nav-item" data-target="sec-10" href="#sec-10"><span class="section-nav-label">10 · Automation</span></a>
+  <a class="section-nav-item" data-target="sec-11" href="#sec-11"><span class="section-nav-label">11 · Tech</span></a>
+  <a class="section-nav-item" data-target="sec-12" href="#sec-12"><span class="section-nav-label">12 · Privacy</span></a>
+  <a class="section-nav-item" data-target="sec-13" href="#sec-13"><span class="section-nav-label">13 · Roadmap</span></a>
+  <a class="section-nav-item" data-target="sec-14" href="#sec-14"><span class="section-nav-label">14 · GTM</span></a>
+  <a class="section-nav-item" data-target="sec-15" href="#sec-15"><span class="section-nav-label">15 · Business</span></a>
+  <a class="section-nav-item" data-target="sec-16" href="#sec-16"><span class="section-nav-label">16 · Cadence</span></a>
+</nav>
+
 <!-- ============================================================ -->
 <!-- COVER -->
 <!-- ============================================================ -->
@@ -1708,7 +1855,7 @@ body.entry-open .fab-button {
 <!-- ============================================================ -->
 <!-- TOC -->
 <!-- ============================================================ -->
-<section class="page">
+<section class="page" id="sec-toc">
   <div class="section-number">Table of Contents · 目录</div>
 
   <div class="toc reveal">
@@ -1736,7 +1883,7 @@ body.entry-open .fab-button {
 <!-- ============================================================ -->
 <!-- 01 - EXECUTIVE SUMMARY -->
 <!-- ============================================================ -->
-<section class="page">
+<section class="page" id="sec-01">
   <div class="section-number">01 · Executive Summary</div>
   <h1 class="section-title reveal">A document<br>about <em>noticing.</em></h1>
   <p class="section-lede reveal">
@@ -1809,7 +1956,7 @@ body.entry-open .fab-button {
 <!-- ============================================================ -->
 <!-- 02 - PRODUCT VISION -->
 <!-- ============================================================ -->
-<section class="page">
+<section class="page" id="sec-02">
   <div class="section-number">02 · Product Vision</div>
   <h1 class="section-title reveal">Time is the only material<br><em>we are made of.</em></h1>
   <p class="section-lede reveal">
@@ -1871,7 +2018,7 @@ body.entry-open .fab-button {
 <!-- ============================================================ -->
 <!-- 03 - MARKET POSITION -->
 <!-- ============================================================ -->
-<section class="page">
+<section class="page" id="sec-03">
   <div class="section-number">03 · Market Position</div>
   <h1 class="section-title reveal">A small, sharp wedge<br>in a <em>crowded</em> room.</h1>
   <p class="section-lede reveal">
@@ -1959,7 +2106,7 @@ body.entry-open .fab-button {
 <!-- ============================================================ -->
 <!-- 04 - DESIGN PHILOSOPHY -->
 <!-- ============================================================ -->
-<section class="page">
+<section class="page" id="sec-04">
   <div class="section-number">04 · Design Philosophy</div>
   <h1 class="section-title reveal">The rules<br>we will not <em>break.</em></h1>
   <p class="section-lede reveal">
@@ -2043,7 +2190,7 @@ body.entry-open .fab-button {
 <!-- ============================================================ -->
 <!-- 05 - VISUAL IDENTITY -->
 <!-- ============================================================ -->
-<section class="page">
+<section class="page" id="sec-05">
   <div class="section-number">05 · Visual Identity</div>
   <h1 class="section-title reveal">A palette of <em>ash and ink,</em><br>with one cold accent.</h1>
   <p class="section-lede reveal">
@@ -2128,7 +2275,7 @@ body.entry-open .fab-button {
 <!-- ============================================================ -->
 <!-- 06 - FEATURE ARCHITECTURE -->
 <!-- ============================================================ -->
-<section class="page">
+<section class="page" id="sec-06">
   <div class="section-number">06 · Feature Architecture</div>
   <h1 class="section-title reveal">Three rooms,<br>no <em>hallways.</em></h1>
   <p class="section-lede reveal">
@@ -2256,7 +2403,7 @@ body.entry-open .fab-button {
 <!-- ============================================================ -->
 <!-- 07 - INFORMATION DESIGN -->
 <!-- ============================================================ -->
-<section class="page">
+<section class="page" id="sec-07">
   <div class="section-number">07 · Information Design</div>
   <h1 class="section-title reveal">Four ways<br>to <em>see a self.</em></h1>
   <p class="section-lede reveal">
