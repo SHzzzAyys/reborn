@@ -1294,6 +1294,75 @@ code {
 
 @media (max-width: 768px) {
   #section-nav { display: none; }
+  #hamburger-btn { display: flex; align-items: center; justify-content: center; }
+}
+
+/* ============================================================ */
+/* MOBILE HAMBURGER NAV                                          */
+/* ============================================================ */
+
+/* Hamburger button — mobile only */
+#hamburger-btn {
+  display: none;
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 900;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--accent-blue);
+  color: #fff;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+/* Bottom sheet overlay */
+#nav-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 890;
+}
+
+/* Bottom sheet */
+#mobile-nav-sheet {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 895;
+  background: var(--paper);
+  border-radius: 16px 16px 0 0;
+  padding: 12px 0 32px;
+  transform: translateY(100%);
+  transition: transform 0.22s ease;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+#mobile-nav-sheet.open {
+  transform: translateY(0);
+}
+#mobile-nav-sheet .sheet-handle {
+  width: 40px; height: 4px;
+  background: var(--rule);
+  border-radius: 2px;
+  margin: 0 auto 12px;
+}
+#mobile-nav-sheet a {
+  display: block;
+  padding: 12px 24px;
+  color: var(--ink);
+  text-decoration: none;
+  font-family: var(--sans);
+  font-size: 14px;
+  border-bottom: 1px solid var(--rule);
+}
+#mobile-nav-sheet a:hover {
+  background: var(--bg-deep);
 }
 
 /* ============================================================ */
@@ -3544,6 +3613,57 @@ const WEEK = [
   [{label:'Days recorded',value:recorded.length},{label:'Avg intensity',value:avg+' / 5'},{label:'Longest run',value:best+' days'},{label:'Brightest month',value:bright}].forEach(({label,value})=>{
     const d=document.createElement('div');d.className='pixel-stat';
     d.innerHTML=`<div class="label">${label}</div><div class="value">${value}</div>`;statsEl.appendChild(d);
+  });
+})();
+</script>
+
+<!-- Mobile hamburger nav -->
+<button id="hamburger-btn" aria-label="打开导航">☰</button>
+<div id="nav-overlay"></div>
+<div id="mobile-nav-sheet">
+  <div class="sheet-handle"></div>
+</div>
+
+<script>
+(function() {
+  var btn = document.getElementById('hamburger-btn');
+  var overlay = document.getElementById('nav-overlay');
+  var sheet = document.getElementById('mobile-nav-sheet');
+
+  // Clone section nav links into the sheet
+  var navLinks = document.querySelectorAll('#section-nav a');
+  navLinks.forEach(function(link) {
+    var a = document.createElement('a');
+    a.href = link.getAttribute('href');
+    // Extract label text from the span.section-nav-label
+    var labelEl = link.querySelector('.section-nav-label');
+    a.textContent = labelEl ? labelEl.textContent : link.textContent;
+    sheet.appendChild(a);
+  });
+
+  function openSheet() {
+    overlay.style.display = 'block';
+    sheet.classList.add('open');
+  }
+  function closeSheet() {
+    overlay.style.display = 'none';
+    sheet.classList.remove('open');
+  }
+
+  btn.addEventListener('click', openSheet);
+  overlay.addEventListener('click', closeSheet);
+
+  // Close sheet and smooth-scroll on link click
+  sheet.querySelectorAll('a').forEach(function(a) {
+    a.addEventListener('click', function(e) {
+      e.preventDefault();
+      var href = a.getAttribute('href');
+      closeSheet();
+      setTimeout(function() {
+        var target = document.querySelector(href);
+        if (target) target.scrollIntoView({ behavior: 'smooth' });
+      }, 250);
+    });
   });
 })();
 </script>
