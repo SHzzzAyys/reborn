@@ -7,6 +7,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,300&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&family=Noto+Serif+SC:wght@300;400;500;600&family=Noto+Sans+SC:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script>
+  try { if (localStorage.getItem('chronos-dark')) document.documentElement.classList.add('dark'); } catch(e) {}
+</script>
 <style>
 :root {
   --bg: #F1EFE8;
@@ -3106,6 +3109,7 @@ function toggleDark() {
 let currentLang = 'en';
 function setLang(lang) {
   currentLang = lang;
+  storageSet('chronos-lang', lang);
   document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';
   document.body.classList.toggle('zh-mode', lang === 'zh');
   document.querySelectorAll('[data-lang]').forEach(btn => btn.classList.toggle('active', btn.dataset.lang === lang));
@@ -3165,7 +3169,7 @@ document.addEventListener('keydown', (event) => {
   if (event.key === 'Escape') closeEntryPanel();
 });
 
-setLang('en');
+setLang(storageGet('chronos-lang') || 'en');
 
 /* ============================================================ */
 /* SECTION INDICATOR                                             */
